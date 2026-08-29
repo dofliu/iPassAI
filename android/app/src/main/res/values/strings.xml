@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">iPassAI</string>
+    <string name="title_activity_main">iPassAI</string>
+    <string name="package_name">com.dofliu.ipassai</string>
+    <string name="custom_url_scheme">com.dofliu.ipassai</string>
+</resources>
