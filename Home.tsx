@@ -7,12 +7,20 @@ import {
   ArrowLeft, ArrowRight, BarChart3, BookOpen, BookOpenText, CheckCircle2, ChevronRight,
   CircleHelp, Clock3, ExternalLink, Flag, GraduationCap, Headphones, Layers3, Play,
   RotateCcw, Sparkles, Volume2, XCircle, Bookmark, CalendarDays, FileText, Search, Tag,
-  CalendarClock, Download, Flame, Target, Upload, ShieldCheck,
+  CalendarClock, Download, Flame, Target, Upload, ShieldCheck, Bell, Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OFFICIAL_RESOURCE_URL, QUESTIONS, SUBJECTS, type Level, type Question } from "@/data/questions";
 import { ENGLISH_B2_SUBJECT } from "@/data/englishQuestions";
 import { CAMBRIDGE_B2_FIRST } from "@/data/cambridgeB2FirstQuestions";
+import PopQuizModal from "@/components/PopQuizModal";
+import NotificationSettingsModal from "@/components/NotificationSettingsModal";
+import {
+  setupNotificationListeners,
+  scheduleQuizNotifications,
+  getNotificationConfig,
+  selectQuizQuestion,
+} from "@/services/notificationService";
 
 type View = "dashboard" | "practice" | "exam" | "review" | "library";
 type ExamMode = "normal" | "mistakes";
@@ -109,6 +117,11 @@ export default function Home() {
   const [examFinished, setExamFinished] = useState(false);
   const [examMode, setExamMode] = useState<ExamMode>("normal");
 
+  const [isPopQuizOpen, setIsPopQuizOpen] = useState(false);
+  const [popQuizQuestionId, setPopQuizQuestionId] = useState<string | null>(null);
+  const [isNotificationSettingsOpen, setIsNotificationSettingsOpen] = useState(false);
+  const [notifConfig, setNotifConfig] = useState(getNotificationConfig);
+
   useEffect(() => {
     const saved = window.localStorage.getItem(ATTEMPTS_KEY);
     if (!saved) return;
@@ -121,6 +134,17 @@ export default function Home() {
     const storedGoalDate = window.localStorage.getItem(GOAL_DATE_KEY);
     if (storedGoalDate && /^\d{4}-\d{2}-\d{2}$/.test(storedGoalDate)) setGoalDate(storedGoalDate);
   }, []);
+
+  useEffect(() => {
+    if (notifConfig.enabled) {
+      scheduleQuizNotifications();
+    }
+    const cleanup = setupNotificationListeners((targetQuestionId) => {
+      setPopQuizQuestionId(targetQuestionId);
+      setIsPopQuizOpen(true);
+    });
+    return cleanup;
+  }, [notifConfig.enabled]);
 
   useEffect(() => {
     if (!examSet.length || examFinished || view !== "exam") return;
@@ -508,5 +532,109 @@ export default function Home() {
     return renderDashboard();
   };
 
-  return <div className="app-shell"><aside className="study-rail"><div className="brand-lockup"><img className="brand-logo" src={LOGO_URL} alt="題策標誌" /><div><div className="brand-name">題策</div><span className="brand-caption">IPAS STUDY WORKBENCH</span></div></div><div className="rail-label">學習軌道</div><nav className="rail-nav">{NAV_ITEMS.map(({ id, label, Icon }) => <button key={id} className={view === id ? "active" : ""} onClick={() => setView(id)}><Icon />{label}</button>)}</nav><div className="rail-footer"><div className="rail-label" style={{ padding: 0 }}>目前累積</div><div className="rail-score">{attempts.length}<span style={{ color: "rgba(238,244,248,.58)", fontSize: 13, letterSpacing: 0 }}> 題</span></div><div className="rail-footnote">答對率 {accuracy}%<br />收藏 {bookmarkQuestions.length} 題 · 本機保存</div></div></aside><div className="workspace"><header className="topbar"><div className="topbar-title"><h1>{NAV_ITEMS.find((item) => item.id === view)?.label}</h1><span className="topbar-separator" /><span className="topbar-meta">題庫 v4.0 · iPAS＋CEFR B2 · Cambridge B2 First</span></div><span className="identity-tag"><span className="identity-dot" />依官方範圍自編</span></header>{renderView()}</div><nav className="mobile-nav">{NAV_ITEMS.map(({ id, label, Icon }) => <button key={id} className={view === id ? "active" : ""} onClick={() => setView(id)}><Icon />{label.replace("學習", "").replace("即時", "").replace("與筆記", "")}</button>)}</nav></div>;
+  return (
+    <div className="app-shell">
+      <aside className="study-rail">
+        <div className="brand-lockup">
+          <img className="brand-logo" src={LOGO_URL} alt="題策標誌" />
+          <div>
+            <div className="brand-name">題策</div>
+            <span className="brand-caption">IPAS STUDY WORKBENCH</span>
+          </div>
+        </div>
+        <div className="rail-label">學習軌道</div>
+        <nav className="rail-nav">
+          {NAV_ITEMS.map(({ id, label, Icon }) => (
+            <button key={id} className={view === id ? "active" : ""} onClick={() => setView(id)}>
+              <Icon />{label}
+            </button>
+          ))}
+        </nav>
+        <div className="rail-footer">
+          <div className="rail-label" style={{ padding: 0 }}>目前累積</div>
+          <div className="rail-score">{attempts.length}<span style={{ color: "rgba(238,244,248,.58)", fontSize: 13, letterSpacing: 0 }}> 題</span></div>
+          <div className="rail-footnote">答對率 {accuracy}%<br />收藏 {bookmarkQuestions.length} 題 · 本機保存</div>
+        </div>
+      </aside>
+
+      <div className="workspace">
+        <header className="topbar">
+          <div className="topbar-title">
+            <h1>{NAV_ITEMS.find((item) => item.id === view)?.label}</h1>
+            <span className="topbar-separator" />
+            <span className="topbar-meta">題庫 v4.0 · iPAS＋CEFR B2 · Cambridge B2 First</span>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => {
+                const q = selectQuizQuestion(notifConfig.scope);
+                setPopQuizQuestionId(q.id);
+                setIsPopQuizOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300/80 text-xs font-bold transition-all shadow-xs cursor-pointer"
+              title="立即開啟隨堂快問快答"
+            >
+              <Zap size={14} className="text-amber-600 fill-amber-500" />
+              <span>隨堂抽考</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsNotificationSettingsOpen(true)}
+              className="relative inline-flex items-center justify-center p-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors shadow-xs cursor-pointer"
+              title="手機隨堂推播與抽考設定"
+              aria-label="推播設定"
+            >
+              <Bell size={16} />
+              {notifConfig.enabled && (
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-indigo-600 ring-2 ring-white" />
+              )}
+            </button>
+
+            <span className="identity-tag">
+              <span className="identity-dot" />依官方範圍自編
+            </span>
+          </div>
+        </header>
+
+        {renderView()}
+      </div>
+
+      <nav className="mobile-nav">
+        {NAV_ITEMS.map(({ id, label, Icon }) => (
+          <button key={id} className={view === id ? "active" : ""} onClick={() => setView(id)}>
+            <Icon />{label.replace("學習", "").replace("即時", "").replace("與筆記", "")}
+          </button>
+        ))}
+      </nav>
+
+      {/* Pop Quiz & Notification Modals */}
+      <PopQuizModal
+        questionId={popQuizQuestionId}
+        isOpen={isPopQuizOpen}
+        onClose={() => setIsPopQuizOpen(false)}
+        onRecordAttempt={(newAttempt) => persistAttempts([newAttempt])}
+        bookmarks={bookmarks}
+        onToggleBookmark={toggleBookmark}
+        notes={notes}
+        onUpdateNote={updateNote}
+      />
+
+      <NotificationSettingsModal
+        isOpen={isNotificationSettingsOpen}
+        onClose={() => {
+          setIsNotificationSettingsOpen(false);
+          setNotifConfig(getNotificationConfig());
+        }}
+        onLaunchInstantQuiz={() => {
+          const q = selectQuizQuestion(notifConfig.scope);
+          setPopQuizQuestionId(q.id);
+          setIsPopQuizOpen(true);
+        }}
+      />
+    </div>
+  );
 }
+
