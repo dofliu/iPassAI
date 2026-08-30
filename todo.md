@@ -34,28 +34,6 @@
 - [x] 將英文科整合至錯題複盤、弱點推薦、每日計畫、收藏、筆記與備份。
 - [x] 驗證多科切換、英文題庫規模與個人化流程，並建立更新版本。
 
-> 本次先以通用 CEFR B2 原創練習建置；若指定 Cambridge B2 First、IELTS 或其他正式考試，另行加入該考試的專屬題型與配分。 
-
-> 題目來源原則：英文題目採本站依 CEFR B2 能力描述自編，不複製受版權保護的正式試題；來源欄位將連結至公開能力框架或官方考試說明。
-
-## CEFR B2 個人化流程補充驗證
-
-- [x] 實測 CEFR B2 錯答後的錯題複盤與弱點主題推薦。
-- [x] 實測 CEFR B2 題目收藏、筆記與備份匯出／匯入。
-- [x] 實測 CEFR B2 題目進入每日複習計畫並完成題組。
-- [x] 建立 CEFR B2 更新後的新 checkpoint，完成可交付版本。
-
-## 交付前補充修正
-
-- [x] 完整跑完 CEFR B2 每日複習題組，驗證交卷、結果摘要與解析頁。
-- [x] 修復或釐清 dev server 的 dotenv 模組錯誤，重新執行最終檢查。
-- [x] 重新建立通過上述檢查的 CEFR B2 可交付 checkpoint。
-
-## 最終日誌確認
-
-- [x] 記錄重啟後最新 devserver 日誌無 dotenv 錯誤，並確認目前服務使用 Vite 靜態入口。
-- [x] 建立已完成全部驗證與日誌確認的 CEFR B2 最終 checkpoint。
-
 ## Cambridge B2 First 專屬模式更新清單
 
 - [x] 盤點 Cambridge B2 First Reading & Use of English、Listening 各 Part 的題型與介面需求。
@@ -65,24 +43,23 @@
 - [x] 將 Cambridge 題目接入錯題、弱點、每日計畫、收藏、筆記與備份。
 - [x] 驗證 Reading、Listening、音訊播放與個人化紀錄，並建立更新版本。
 
-## Cambridge 個人化流程補充驗證
+## 手機定時抽考推播與隨堂快問快答清單
 
-- [x] 實測 Cambridge 題目進入錯題複盤、弱點推薦與每日複習計畫，並記錄結果。
-- [x] 實測 Cambridge 題目的收藏、筆記與 JSON 備份匯出／匯入，確認可完整還原。
-- [x] 完成 Cambridge B2 First 更新後建立新的 checkpoint／版本 ID，作為可交付版本證據。
+- [x] 整合 `@capacitor/local-notifications` 支援 Android 原生推播通知。
+- [x] 新增 `src/services/notificationService.ts` 實作推播頻率排程與錯題優先抽題。
+- [x] 建立 `PopQuizModal.tsx` 支援隨堂快問快答與本機作答紀錄連動。
+- [x] 建立 `NotificationSettingsModal.tsx` 支援推播頻率、科目範圍與測試推播。
+- [x] 建立推播單元測試 `notificationService.test.ts`。
 
-## Cambridge 交付前缺口補強
+## CEFR B2 題型全面擴充與全科目全真模擬考清單
 
-- [x] 重新實測 Cambridge 錯答後，確認該題或其主題出現在錯題複盤的弱點推薦與待複盤列表。
-- [x] 重新驗證 Cambridge 題目的收藏按鈕確實改變收藏數，並確認 JSON 備份同時包含 Cambridge bookmark 與 note。
-- [x] 匯入含 Cambridge bookmark 與 note 的備份，確認安全合併或完整還原後資料仍存在。
-- [x] 建立新的 Cambridge B2 First 交付 checkpoint 並記錄版本 ID。
-
-## 交付後功能擴充：趨勢與衝刺
-
-- [ ] 新增專屬 JSON 備份管理面板，提供檔案摘要、匯出、匯入預覽、安全合併與完整還原。
-- [ ] 新增每週學習熱圖，依本機作答日期與完成量呈現最近週期的學習強度。
-- [ ] 新增主題進步曲線，依日期聚合答題表現並顯示可解讀的趨勢摘要。
-- [ ] 新增 30 天衝刺模式，依考試日期計算啟用狀態並自動配置 iPAS 與 Cambridge 混合每日題量。
-- [ ] 為備份管理、熱圖、主題曲線與衝刺配額補上 Vitest 單元測試。
-- [ ] 完成桌面與手機版互動驗證、型別檢查、測試、production build，並建立新 checkpoint。
+- [x] 擴充 `englishQuestions.ts`，新增篇章克漏字、搭配詞片語、文法句型置換與情境語用（題庫增至 174 題）。
+- [x] 建立 `src/data/examSpecs.ts` 定義 iPAS 初級/中級、CEFR B2、Cambridge B2 First 官方模考規格。
+- [x] 升級 `Home.tsx` 模擬測驗介面：
+  - [x] 支援「全真標準模考」與「自訂題數模考」切換。
+  - [x] 支援考場「題目標記 (Flag for Review)」。
+  - [x] 支援答題卡矩陣導覽跳題與狀態即時統計（已答/未答/標記）。
+  - [x] 支援倒數 5 分鐘警示與漏答確認防呆。
+  - [x] 實作正式成績單：及格判定 (PASS/FAIL)、分項主題得分率診斷條 (Diagnostics)。
+- [x] 建立 `docs/USER_GUIDE.md` 使用者操作指南與 `docs/PROJECT_PLAN.md` 專案架構規劃書。
+- [x] 驗證單元測試、型別檢查與 Gradle Android APK 打包流程。
