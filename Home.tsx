@@ -1,18 +1,21 @@
-/**
- * 靛藍題庫工坊主頁：左側學習軌道、紙本題目閱讀板與螢光標記線。
- * 所有練習紀錄僅儲存在目前瀏覽器的 localStorage，不會上傳。
- */
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import {
   ArrowLeft, ArrowRight, BarChart3, BookOpen, BookOpenText, CheckCircle2, ChevronRight,
   CircleHelp, Clock3, ExternalLink, Flag, GraduationCap, Headphones, Layers3, Play,
   RotateCcw, Sparkles, Volume2, XCircle, Bookmark, CalendarDays, FileText, Search, Tag,
-  CalendarClock, Download, Flame, Target, Upload, ShieldCheck, Bell, Zap,
+  CalendarClock, Download, Flame, Target, Upload, ShieldCheck, Bell, Zap, Trophy,
+  Award, AlertCircle, ListChecks, HelpCircle, Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OFFICIAL_RESOURCE_URL, QUESTIONS, SUBJECTS, type Level, type Question } from "@/data/questions";
 import { ENGLISH_B2_SUBJECT } from "@/data/englishQuestions";
 import { CAMBRIDGE_B2_FIRST } from "@/data/cambridgeB2FirstQuestions";
+import {
+  findExamSpec,
+  buildOfficialExamQuestionSet,
+  OFFICIAL_EXAM_SPECS,
+  type ExamSpec,
+} from "@/data/examSpecs";
 import PopQuizModal from "@/components/PopQuizModal";
 import NotificationSettingsModal from "@/components/NotificationSettingsModal";
 import {
@@ -23,12 +26,14 @@ import {
 } from "@/services/notificationService";
 
 type View = "dashboard" | "practice" | "exam" | "review" | "library";
-type ExamMode = "normal" | "mistakes";
+type ExamMode = "normal" | "mistakes" | "official";
+type ExamType = "official_full" | "custom_quick";
 type EnglishMode = "通用 CEFR B2" | "Cambridge B2 First";
 type CambridgeComponent = "全部元件" | "Reading & Use of English" | "Listening";
 type LibraryExamFilter = "全部模式" | EnglishMode;
 type Attempt = { questionId: string; correct: boolean; selectedAnswer?: number; date: string; mode: "練習" | "測驗" };
 type BackupPayload = { version: 1; exportedAt: string; bookmarks: string[]; notes: Record<string, string> };
+
 
 const LOGO_URL = "/manus-storage/ipas-logo-mark_67d604fe.png";
 const HERO_URL = "/manus-storage/ipas-hero-study-desk_6d68be79.png";
@@ -116,6 +121,12 @@ export default function Home() {
   const [examSeconds, setExamSeconds] = useState(20 * 60);
   const [examFinished, setExamFinished] = useState(false);
   const [examMode, setExamMode] = useState<ExamMode>("normal");
+  const [examType, setExamType] = useState<ExamType>("official_full");
+  const [activeExamSpec, setActiveExamSpec] = useState<ExamSpec | null>(null);
+  const [flaggedQuestions, setFlaggedQuestions] = useState<string[]>([]);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [examTotalDuration, setExamTotalDuration] = useState(60 * 60);
+  const [resultFilter, setResultFilter] = useState<"all" | "wrong" | "flagged">("all");
 
   const [isPopQuizOpen, setIsPopQuizOpen] = useState(false);
   const [popQuizQuestionId, setPopQuizQuestionId] = useState<string | null>(null);
@@ -266,17 +277,61 @@ export default function Home() {
     setPracticeIndex((index) => index + 1); setPracticeAnswer(null); setPracticeSubmitted(false);
   };
 
-  const startExam = () => {
-    const next = makeSet(count);
-    setExamSet(next); setExamIndex(0); setExamAnswers({}); setExamSeconds(Math.max(10, next.length) * 60); setExamFinished(false); setExamMode("normal"); setView("exam");
+  const toggleFlag = (questionId: string) => {
+    setFlaggedQuestions((prev) =>
+      prev.includes(questionId) ? prev.filter((id) => id !== questionId) : [...prev, questionId]
+    );
+  };
+
+  const startExam = (type: ExamType = examType) => {
+    const spec = findExamSpec(level, subject, englishMode, cambridgeComponent);
+    if (type === "official_full" && spec) {
+      const next = buildOfficialExamQuestionSet(QUESTIONS, spec);
+      setActiveExamSpec(spec);
+      setExamSet(next);
+      setExamIndex(0);
+      setExamAnswers({});
+      setFlaggedQuestions([]);
+      setResultFilter("all");
+      const totalSecs = spec.officialDurationMinutes * 60;
+      setExamSeconds(totalSecs);
+      setExamTotalDuration(totalSecs);
+      setExamFinished(false);
+      setExamMode("official");
+      setView("exam");
+    } else {
+      const next = makeSet(count);
+      setActiveExamSpec(null);
+      setExamSet(next);
+      setExamIndex(0);
+      setExamAnswers({});
+      setFlaggedQuestions([]);
+      setResultFilter("all");
+      const totalSecs = Math.max(10, next.length) * 60;
+      setExamSeconds(totalSecs);
+      setExamTotalDuration(totalSecs);
+      setExamFinished(false);
+      setExamMode("normal");
+      setView("exam");
+    }
   };
 
   function finishExam() {
     if (!examSet.length || examFinished) return;
+    setShowSubmitModal(false);
     const now = new Date().toISOString();
-    persistAttempts(examSet.map((question) => ({ questionId: question.id, selectedAnswer: examAnswers[question.id], correct: examAnswers[question.id] === question.answer, date: now, mode: "測驗" })));
+    persistAttempts(
+      examSet.map((question) => ({
+        questionId: question.id,
+        selectedAnswer: examAnswers[question.id],
+        correct: examAnswers[question.id] === question.answer,
+        date: now,
+        mode: "測驗",
+      }))
+    );
     setExamFinished(true);
   }
+
 
   const resetProgress = () => {
     window.localStorage.removeItem(ATTEMPTS_KEY);
@@ -388,7 +443,18 @@ export default function Home() {
   const startMistakeExam = () => {
     const next = shuffle(mistakes).slice(0, Math.min(Math.max(count, 5), mistakes.length));
     if (!next.length) return;
-    setExamSet(next); setExamIndex(0); setExamAnswers({}); setExamSeconds(Math.max(10, next.length) * 60); setExamFinished(false); setExamMode("mistakes"); setView("exam");
+    setActiveExamSpec(null);
+    setExamSet(next);
+    setExamIndex(0);
+    setExamAnswers({});
+    setFlaggedQuestions([]);
+    setResultFilter("all");
+    const totalSecs = Math.max(10, next.length) * 60;
+    setExamSeconds(totalSecs);
+    setExamTotalDuration(totalSecs);
+    setExamFinished(false);
+    setExamMode("mistakes");
+    setView("exam");
   };
   const dailyPlan = useMemo(() => {
     const now = Date.now();
@@ -437,27 +503,157 @@ export default function Home() {
     return { name, total: scoped.length, score: scoped.length ? Math.round((scoped.filter((item) => item.correct).length / scoped.length) * 100) : 0 };
   }).filter((item) => item.total > 0).slice(0, 4), [attempts]);
 
+  const currentExamSpec = useMemo(
+    () => findExamSpec(level, subject, englishMode, cambridgeComponent),
+    [level, subject, englishMode, cambridgeComponent]
+  );
+
   const renderSidebarFilters = (action: "practice" | "exam") => (
     <aside className="task-sidebar">
-      <div className="eyebrow">題目篩選器</div>
-      <h2>{action === "practice" ? "這次想練哪裡？" : "設定這回測驗"}</h2>
-      <p>{action === "practice" ? "抽題條件會顯示在題目上方。做錯後立即看見原因。" : "題目來自目前條件的原創題庫；每題預設 1 分鐘，時間可作為自我節奏提示。"}</p>
+      <div className="eyebrow">{action === "practice" ? "題目篩選器" : "全真模考設定"}</div>
+      <h2>{action === "practice" ? "這次想練哪裡？" : "設定模擬考試"}</h2>
+      <p>
+        {action === "practice"
+          ? "抽題條件會顯示在題目上方。做錯後立即看見原因。"
+          : "支援全科目【官方標準規格全真模考】與【自訂彈性模考】。作答全程計時並提供能力診斷成績單。"}
+      </p>
+
+      {action === "exam" && (
+        <div className="exam-type-toggle">
+          <button
+            className={`exam-type-btn ${examType === "official_full" ? "active" : ""}`}
+            onClick={() => setExamType("official_full")}
+          >
+            🏆 全真標準模考
+          </button>
+          <button
+            className={`exam-type-btn ${examType === "custom_quick" ? "active" : ""}`}
+            onClick={() => setExamType("custom_quick")}
+          >
+            ⏱️ 自訂題數模考
+          </button>
+        </div>
+      )}
+
       <div className="filter-stack">
-        <label><span className="field-label">級別</span><select className="select-field" value={level} onChange={(event) => changeLevel(event.target.value as Level)}><option>初級</option><option>中級</option></select></label>
-        <label><span className="field-label">科目</span><select className="select-field" value={subject} onChange={(event) => changeSubject(event.target.value)}>{SUBJECTS[level].map((item) => <option key={item}>{item}</option>)}</select></label>
-        {subject === ENGLISH_B2_SUBJECT && <>
-          <label><span className="field-label">英文模式</span><select className="select-field" value={englishMode} onChange={(event) => changeEnglishMode(event.target.value as EnglishMode)}><option>通用 CEFR B2</option><option>Cambridge B2 First</option></select></label>
-          {englishMode === CAMBRIDGE_B2_FIRST && <>
-            <label><span className="field-label">測驗元件</span><select className="select-field" value={cambridgeComponent} onChange={(event) => changeCambridgeComponent(event.target.value as CambridgeComponent)}><option>全部元件</option><option>Reading &amp; Use of English</option><option>Listening</option></select></label>
-            <label><span className="field-label">Part</span><select className="select-field" value={cambridgePart} onChange={(event) => { setCambridgePart(event.target.value); setTopic("全部主題"); }}>{cambridgeParts.map((item) => <option key={item}>{item}</option>)}</select></label>
-          </>}
-        </>}
-        <label><span className="field-label">主題</span><select className="select-field" value={topic} onChange={(event) => setTopic(event.target.value)}>{topics.map((item) => <option key={item}>{item}</option>)}</select></label>
-        <div className="filter-divider" />
-        <div><span className="field-label">題數</span><div className="count-set">{[5, 10, 20].map((item) => <button key={item} className={`count-button ${count === item ? "active" : ""}`} onClick={() => setCount(item)}>{item}</button>)}</div></div>
-        <Button className="solid-button" onClick={() => action === "practice" ? startPractice() : startExam()}>{action === "practice" ? <><Sparkles />重新抽題</> : <><Play />開始計時測驗</>}</Button>
+        <label>
+          <span className="field-label">級別</span>
+          <select className="select-field" value={level} onChange={(event) => changeLevel(event.target.value as Level)}>
+            <option>初級</option>
+            <option>中級</option>
+          </select>
+        </label>
+        <label>
+          <span className="field-label">科目</span>
+          <select className="select-field" value={subject} onChange={(event) => changeSubject(event.target.value)}>
+            {SUBJECTS[level].map((item) => <option key={item}>{item}</option>)}
+          </select>
+        </label>
+        {subject === ENGLISH_B2_SUBJECT && (
+          <>
+            <label>
+              <span className="field-label">英文模式</span>
+              <select className="select-field" value={englishMode} onChange={(event) => changeEnglishMode(event.target.value as EnglishMode)}>
+                <option>通用 CEFR B2</option>
+                <option>Cambridge B2 First</option>
+              </select>
+            </label>
+            {englishMode === CAMBRIDGE_B2_FIRST && (
+              <>
+                <label>
+                  <span className="field-label">測驗元件</span>
+                  <select className="select-field" value={cambridgeComponent} onChange={(event) => changeCambridgeComponent(event.target.value as CambridgeComponent)}>
+                    <option>全部元件</option>
+                    <option>Reading &amp; Use of English</option>
+                    <option>Listening</option>
+                  </select>
+                </label>
+                {action === "practice" && (
+                  <label>
+                    <span className="field-label">Part</span>
+                    <select className="select-field" value={cambridgePart} onChange={(event) => { setCambridgePart(event.target.value); setTopic("全部主題"); }}>
+                      {cambridgeParts.map((item) => <option key={item}>{item}</option>)}
+                    </select>
+                  </label>
+                )}
+              </>
+            )}
+          </>
+        )}
+
+        {action === "practice" && (
+          <label>
+            <span className="field-label">主題</span>
+            <select className="select-field" value={topic} onChange={(event) => setTopic(event.target.value)}>
+              {topics.map((item) => <option key={item}>{item}</option>)}
+            </select>
+          </label>
+        )}
+
+        {action === "exam" && examType === "official_full" && currentExamSpec && (
+          <div className="exam-spec-card">
+            <span className="exam-spec-badge">{currentExamSpec.badge}</span>
+            <div style={{ fontWeight: 700, fontSize: "13px", color: "var(--indigo)", marginBottom: "4px" }}>
+              {currentExamSpec.name}
+            </div>
+            <div className="exam-spec-numbers">
+              <span>📝 {currentExamSpec.officialQuestionCount} 題</span>
+              <span>⏳ {currentExamSpec.officialDurationMinutes} 分鐘</span>
+              <span>🎯 {currentExamSpec.passingScoreNote}</span>
+            </div>
+            <div className="exam-spec-desc">{currentExamSpec.description}</div>
+          </div>
+        )}
+
+        {(action === "practice" || (action === "exam" && examType === "custom_quick")) && (
+          <>
+            <div className="filter-divider" />
+            <div>
+              <span className="field-label">題數</span>
+              <div className="count-set">
+                {[5, 10, 20, 25].map((item) => (
+                  <button
+                    key={item}
+                    className={`count-button ${count === item ? "active" : ""}`}
+                    onClick={() => setCount(item)}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        <Button
+          className="solid-button"
+          onClick={() => (action === "practice" ? startPractice() : startExam(examType))}
+        >
+          {action === "practice" ? (
+            <>
+              <Sparkles />重新抽題
+            </>
+          ) : examType === "official_full" && currentExamSpec ? (
+            <>
+              <Trophy />開始全真標準模考 ({currentExamSpec.officialQuestionCount}題/{currentExamSpec.officialDurationMinutes}分)
+            </>
+          ) : (
+            <>
+              <Play />開始計時測驗 ({count}題)
+            </>
+          )}
+        </Button>
       </div>
-      <div className="source-note">可用題數：<strong>{filtered.length}</strong> 題。{englishMode === CAMBRIDGE_B2_FIRST ? "Reading & Use of English Part 1–7、Listening Part 1–4；Listening 以本站原創語音稿播放。" : "所有互動題均為依官方範圍自編。"} <a href={OFFICIAL_RESOURCE_URL} target="_blank" rel="noreferrer">官方歷屆公告試題 <ExternalLink size={11} /></a></div>
+      <div className="source-note">
+        可用題數：<strong>{filtered.length}</strong> 題。
+        {englishMode === CAMBRIDGE_B2_FIRST
+          ? "Reading & Use of English Part 1–7、Listening Part 1–4；Listening 以本站原創語音稿播放。"
+          : "所有題目均依官方鑑定考綱精準編撰，支援完整考時倒數與及格診斷。"}
+        {" "}
+        <a href={OFFICIAL_RESOURCE_URL} target="_blank" rel="noreferrer">
+          官方歷屆公告試題 <ExternalLink size={11} />
+        </a>
+      </div>
     </aside>
   );
 
@@ -500,14 +696,360 @@ export default function Home() {
   };
 
   const renderExam = () => {
-    if (!examSet.length) return <div className="empty-stage"><GraduationCap /><div><h3>設定模擬測驗</h3><p>左側可設定級別、科目、主題與題數。開始後每題預設 1 分鐘，並可在任何時候交卷。</p></div></div>;
+    if (!examSet.length) {
+      return (
+        <div className="empty-stage">
+          <GraduationCap />
+          <div>
+            <h3>設定全真模擬考試</h3>
+            <p>
+              左側可選擇【全真標準模考（官方時限與題量）】或【自訂計時模考】。
+              進入後支援題號導覽跳題、題目標記（Flag）與交卷能力診斷報告。
+            </p>
+          </div>
+        </div>
+      );
+    }
+
     if (examFinished) {
       const correct = examSet.filter((q) => examAnswers[q.id] === q.answer).length;
-      return <div className="exam-result"><div className="result-banner"><div className="eyebrow">{examMode === "mistakes" ? "錯題專屬測驗完成" : "測驗完成"}</div><h2>結果不是終點，是下一輪篩選條件。</h2><p>下方保留每題答案、解析、來源與易錯提醒；錯題會收錄到本機複盤清單。</p><div className="result-score">{correct}<small> / {examSet.length} 題正確</small></div></div>{examSet.map((question, index) => { const selected = examAnswers[question.id]; const ok = selected === question.answer; return <article key={question.id} className={`review-item ${ok ? "" : "wrong"}`}><div className="eyebrow">{String(index + 1).padStart(2, "0")} · {question.topic}{question.examFamily ? ` · ${question.part}` : ""}</div>{renderCambridgeContext(question, true)}<h3>{question.stem}</h3><p className="review-answer">{ok ? "答對" : `答錯 · 你的答案：${selected === undefined ? "未作答" : `${CHOICES[selected]} ${question.options[selected]}`}`}</p><p><strong>正解：</strong>{CHOICES[question.answer]} {question.options[question.answer]}</p><p><strong>解析：</strong>{question.explanation}</p><p><strong>易錯提醒：</strong>{question.trap}</p>{renderSource(question)}</article>; })}</div>;
+      const scorePercent = Math.round((correct / examSet.length) * 100);
+      const passingPercent = activeExamSpec ? activeExamSpec.passingScorePercent : 70;
+      const isPassed = scorePercent >= passingPercent;
+      const timeSpent = Math.max(0, examTotalDuration - examSeconds);
+      const timeSpentText = `${Math.floor(timeSpent / 60)} 分 ${timeSpent % 60} 秒`;
+
+      // 依主題分項統計
+      const topicStats = new Map<string, { total: number; correct: number }>();
+      examSet.forEach((q) => {
+        const cur = topicStats.get(q.topic) ?? { total: 0, correct: 0 };
+        cur.total += 1;
+        if (examAnswers[q.id] === q.answer) cur.correct += 1;
+        topicStats.set(q.topic, cur);
+      });
+
+      const filteredReviewSet = examSet.filter((q) => {
+        if (resultFilter === "wrong") return examAnswers[q.id] !== q.answer;
+        if (resultFilter === "flagged") return flaggedQuestions.includes(q.id);
+        return true;
+      });
+
+      return (
+        <div className="exam-result">
+          <div className={`result-status-card ${isPassed ? "pass" : "fail"}`}>
+            <div className="eyebrow" style={{ color: "rgba(255,255,255,0.85)" }}>
+              {activeExamSpec ? activeExamSpec.name : examMode === "mistakes" ? "錯題專屬測驗成績" : "模擬測驗成績"}
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "12px", margin: "10px 0" }}>
+              <h2>{isPassed ? "👑 考試合格 (PASS)" : "⚠️ 未達及格標準 (FAIL)"}</h2>
+              <div style={{ padding: "6px 12px", background: isPassed ? "var(--yellow)" : "#f87171", color: "var(--indigo)", fontWeight: 800, fontSize: "13px" }}>
+                {isPassed ? "通過及格門檻" : "需要再複盤弱點"}
+              </div>
+            </div>
+            <p style={{ margin: "4px 0 16px", color: "rgba(255,255,255,0.85)", fontSize: "13px" }}>
+              {activeExamSpec
+                ? `${activeExamSpec.passingScoreNote} · 耗時：${timeSpentText}`
+                : `合格門檻：70 分 · 耗時：${timeSpentText}`}
+            </p>
+            <div className="result-score">
+              {scorePercent} <span style={{ fontSize: "28px" }}>分</span>
+              <small style={{ marginLeft: "12px" }}>({correct} / {examSet.length} 題正確)</small>
+            </div>
+          </div>
+
+          {/* 分項能力診斷報告 */}
+          <div className="topic-diagnostics">
+            <div className="eyebrow">TOPIC PERFORMANCE DIAGNOSTICS</div>
+            <h3 style={{ margin: "6px 0 14px", fontSize: "18px", letterSpacing: "-0.04em" }}>
+              分項主題掌握度診斷
+            </h3>
+            {Array.from(topicStats.entries()).map(([tName, stat]) => {
+              const tPct = Math.round((stat.correct / stat.total) * 100);
+              const barColor = tPct >= 80 ? "var(--jade)" : tPct >= 60 ? "var(--yellow)" : "var(--brick)";
+              return (
+                <div key={tName} className="topic-diag-row">
+                  <div>
+                    <strong>{tName}</strong>
+                    <div style={{ color: "var(--muted)", fontSize: "10px" }}>
+                      答對 {stat.correct} / {stat.total} 題
+                    </div>
+                  </div>
+                  <div className="diag-bar-track">
+                    <div className="diag-bar-fill" style={{ width: `${tPct}%`, background: barColor }} />
+                  </div>
+                  <div style={{ textAlign: "right", fontWeight: 700, color: tPct >= 60 ? "var(--indigo)" : "var(--brick)" }}>
+                    {tPct}% {tPct >= 80 ? "👑" : tPct >= 60 ? "⚡" : "⚠️"}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* 模考操作工具列 */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", margin: "10px 0" }}>
+            {examSet.some((q) => examAnswers[q.id] !== q.answer) && (
+              <Button className="solid-button" onClick={startMistakeExam}>
+                <Flag /> 針對本次錯題立即練習 ({examSet.filter((q) => examAnswers[q.id] !== q.answer).length} 題)
+              </Button>
+            )}
+            <Button className="outline-button" onClick={() => startExam(examType)}>
+              <RotateCcw /> 重新挑戰模考
+            </Button>
+            <Button className="outline-button" onClick={() => setView("review")}>
+              <BarChart3 /> 查看錯題複盤庫
+            </Button>
+          </div>
+
+          {/* 題目篩選器 */}
+          <div style={{ display: "flex", gap: "8px", margin: "16px 0 6px", alignItems: "center" }}>
+            <span style={{ fontSize: "12px", color: "var(--muted)", fontWeight: 700 }}>逐題檢視：</span>
+            <button
+              className={`count-button ${resultFilter === "all" ? "active" : ""}`}
+              onClick={() => setResultFilter("all")}
+            >
+              全部 ({examSet.length})
+            </button>
+            <button
+              className={`count-button ${resultFilter === "wrong" ? "active" : ""}`}
+              onClick={() => setResultFilter("wrong")}
+            >
+              只看錯題 ({examSet.filter((q) => examAnswers[q.id] !== q.answer).length})
+            </button>
+            <button
+              className={`count-button ${resultFilter === "flagged" ? "active" : ""}`}
+              onClick={() => setResultFilter("flagged")}
+            >
+              只看標記 ({flaggedQuestions.length})
+            </button>
+          </div>
+
+          {filteredReviewSet.map((question) => {
+            const selected = examAnswers[question.id];
+            const ok = selected === question.answer;
+            const isFlagged = flaggedQuestions.includes(question.id);
+            return (
+              <article key={question.id} className={`review-item ${ok ? "" : "wrong"}`}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div className="eyebrow">
+                    第 {String(examSet.findIndex((q) => q.id === question.id) + 1).padStart(2, "0")} 題 · {question.topic}
+                    {question.examFamily ? ` · ${question.part}` : ""}
+                  </div>
+                  {isFlagged && (
+                    <span style={{ color: "#d97706", fontSize: "11px", fontWeight: 700 }}>
+                      ★ 測驗中已標記
+                    </span>
+                  )}
+                </div>
+                {renderCambridgeContext(question, true)}
+                <h3>{question.stem}</h3>
+                <p className="review-answer">
+                  {ok
+                    ? "判斷正確"
+                    : `答錯 · 你的作答：${
+                        selected === undefined
+                          ? "未作答"
+                          : `${CHOICES[selected]} ${question.options[selected]}`
+                      }`}
+                </p>
+                <p>
+                  <strong>正解：</strong>{CHOICES[question.answer]} {question.options[question.answer]}
+                </p>
+                <p>
+                  <strong>解析：</strong>{question.explanation}
+                </p>
+                <p>
+                  <strong>易錯提醒：</strong>{question.trap}
+                </p>
+                {renderSource(question)}
+                {renderQuestionTools(question)}
+              </article>
+            );
+          })}
+        </div>
+      );
     }
+
     if (!currentExamQuestion) return null;
-    return <div><div className="exam-topline"><span>{examMode === "mistakes" ? "錯題專屬測驗 · 已答錯題目" : `模擬測驗 · ${level} / ${subject}`}</span><span className="exam-clock"><Clock3 />{timeText(examSeconds)}</span></div><div className="exam-pager">{examSet.map((item, index) => <button key={item.id} className={`pager-button ${index === examIndex ? "current" : ""} ${examAnswers[item.id] !== undefined ? "answered" : ""}`} onClick={() => setExamIndex(index)}>{index + 1}</button>)}</div><article className="question-sheet"><div className="question-meta"><div className="tag-row"><span className="index-tag yellow">{currentExamQuestion.level}</span><span className="index-tag">{currentExamQuestion.topic}</span><span className="index-tag">{currentExamQuestion.difficulty}</span>{currentExamQuestion.examFamily && <span className="index-tag cambridge-tag">{currentExamQuestion.part}</span>}</div><span className="question-number">題次 {examIndex + 1} / {examSet.length}</span></div>{renderCambridgeContext(currentExamQuestion)}<h2 className="question-stem">{currentExamQuestion.stem}</h2><div className="option-list">{currentExamQuestion.options.map((option, index) => <button key={option} className={`option ${examAnswers[currentExamQuestion.id] === index ? "chosen" : ""}`} onClick={() => setExamAnswers((answers) => ({ ...answers, [currentExamQuestion.id]: index }))}><span className="option-letter">{CHOICES[index]}</span><span className="option-copy">{option}</span></button>)}</div><div className="exam-nav"><Button className="outline-button" disabled={examIndex === 0} onClick={() => setExamIndex((index) => index - 1)}><ArrowLeft />上一題</Button><div className="exam-nav-right">{examIndex < examSet.length - 1 && <Button className="outline-button" onClick={() => setExamIndex((index) => index + 1)}>下一題<ArrowRight /></Button>}<Button className="solid-button" onClick={finishExam}>交卷並看解析</Button></div></div>{renderSource(currentExamQuestion)}</article></div>;
+
+    const answeredCount = Object.keys(examAnswers).length;
+    const unansweredCount = examSet.length - answeredCount;
+    const isCurrentFlagged = flaggedQuestions.includes(currentExamQuestion.id);
+
+    return (
+      <div>
+        <div className="exam-topline">
+          <span>
+            {examMode === "mistakes"
+              ? "錯題專屬測驗"
+              : activeExamSpec
+              ? activeExamSpec.name
+              : `模擬測驗 · ${level} / ${subject}`}
+          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <button
+              className={`exam-flag-btn ${isCurrentFlagged ? "active" : ""}`}
+              onClick={() => toggleFlag(currentExamQuestion.id)}
+            >
+              <Flag size={13} fill={isCurrentFlagged ? "currentColor" : "none"} />
+              {isCurrentFlagged ? "已標記" : "標記此題"}
+            </button>
+            <span className={`exam-clock ${examSeconds <= 300 ? "urgent" : ""}`}>
+              <Clock3 />
+              {timeText(examSeconds)}
+              {examSeconds <= 300 && " (剩餘 5 分鐘)"}
+            </span>
+          </div>
+        </div>
+
+        {/* 答題卡題號導覽 */}
+        <div style={{ margin: "10px 0 14px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11px", color: "var(--muted)" }}>
+          <span>答題卡導覽（點擊跳題）：</span>
+          <span>
+            已答 <strong style={{ color: "var(--jade)" }}>{answeredCount}</strong> 題 · 
+            未答 <strong style={{ color: "var(--brick)" }}>{unansweredCount}</strong> 題 · 
+            標記 <strong style={{ color: "#d97706" }}>{flaggedQuestions.length}</strong> 題
+          </span>
+        </div>
+
+        <div className="exam-pager">
+          {examSet.map((item, index) => {
+            const isAnswered = examAnswers[item.id] !== undefined;
+            const isFlagged = flaggedQuestions.includes(item.id);
+            return (
+              <button
+                key={item.id}
+                className={`pager-button ${index === examIndex ? "current" : ""} ${
+                  isAnswered ? "answered" : ""
+                } ${isFlagged ? "flagged" : ""}`}
+                onClick={() => setExamIndex(index)}
+                title={`第 ${index + 1} 題 ${isAnswered ? "（已答）" : "（未答）"}${isFlagged ? " [已標記]" : ""}`}
+              >
+                {index + 1}
+              </button>
+            );
+          })}
+        </div>
+
+        <article className="question-sheet">
+          <div className="question-meta">
+            <div className="tag-row">
+              <span className="index-tag yellow">{currentExamQuestion.level}</span>
+              <span className="index-tag">{currentExamQuestion.subject}</span>
+              <span className="index-tag">{currentExamQuestion.topic}</span>
+              <span className="index-tag">{currentExamQuestion.difficulty}</span>
+              {currentExamQuestion.examFamily && (
+                <span className="index-tag cambridge-tag">{currentExamQuestion.part}</span>
+              )}
+            </div>
+            <span className="question-number">
+              題次 {examIndex + 1} / {examSet.length}
+            </span>
+          </div>
+
+          {renderCambridgeContext(currentExamQuestion)}
+          <h2 className="question-stem">{currentExamQuestion.stem}</h2>
+
+          <div className="option-list">
+            {currentExamQuestion.options.map((option, index) => (
+              <button
+                key={option}
+                className={`option ${
+                  examAnswers[currentExamQuestion.id] === index ? "chosen" : ""
+                }`}
+                onClick={() =>
+                  setExamAnswers((answers) => ({
+                    ...answers,
+                    [currentExamQuestion.id]: index,
+                  }))
+                }
+              >
+                <span className="option-letter">{CHOICES[index]}</span>
+                <span className="option-copy">{option}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="exam-nav">
+            <Button
+              className="outline-button"
+              disabled={examIndex === 0}
+              onClick={() => setExamIndex((index) => index - 1)}
+            >
+              <ArrowLeft />上一題
+            </Button>
+            <div className="exam-nav-right">
+              {examIndex < examSet.length - 1 && (
+                <Button
+                  className="outline-button"
+                  onClick={() => setExamIndex((index) => index + 1)}
+                >
+                  下一題<ArrowRight />
+                </Button>
+              )}
+              <Button
+                className="solid-button"
+                onClick={() => {
+                  if (unansweredCount > 0) {
+                    setShowSubmitModal(true);
+                  } else {
+                    finishExam();
+                  }
+                }}
+              >
+                交卷並看成績單
+              </Button>
+            </div>
+          </div>
+          {renderSource(currentExamQuestion)}
+        </article>
+
+        {/* 提早交卷漏答確認對話框 */}
+        {showSubmitModal && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.6)",
+              display: "grid",
+              placeItems: "center",
+              zIndex: 100,
+              padding: "20px",
+            }}
+          >
+            <div
+              style={{
+                maxWidth: "460px",
+                width: "100%",
+                background: "white",
+                padding: "26px",
+                border: "2px solid var(--indigo)",
+                boxShadow: "10px 10px 0 rgba(0,0,0,0.2)",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--brick)", marginBottom: "12px" }}>
+                <AlertCircle size={24} />
+                <h3 style={{ margin: 0, fontSize: "19px" }}>確認交卷提示</h3>
+              </div>
+              <p style={{ fontSize: "14px", lineHeight: "1.7", color: "var(--ink)" }}>
+                您目前尚有 <strong style={{ color: "var(--brick)", fontSize: "16px" }}>{unansweredCount}</strong> 題尚未作答！
+                <br />
+                未作答的題目將計為 0 分並列入錯題複盤。您確定要現在交卷嗎？
+              </p>
+              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "20px" }}>
+                <Button className="outline-button" onClick={() => setShowSubmitModal(false)}>
+                  返回繼續作答
+                </Button>
+                <Button className="solid-button" onClick={finishExam}>
+                  確認交卷評分
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
+
 
   const renderDailyPlan = () => <section className="daily-plan"><div className="daily-plan-title"><div><div className="eyebrow">TODAY'S REVIEW FILE</div><h2>今日複習計畫</h2><p>{dailyPlan.length ? "以最近 14 天的作答、錯題主題與題目難度排出優先順序。" : "先完成幾題練習；系統會依近期作答與難度建立你的今日複習清單。"}</p></div><CalendarDays /></div>{dailyPlan.length ? <><div className="plan-list">{dailyPlan.slice(0, 4).map((item, index) => <div className="plan-item" key={item.question.id}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{item.question.topic}</strong><small>{item.question.difficulty} · {item.reason}</small></div></div>)}</div><Button className="solid-button" onClick={startDailyPlan}><CalendarDays />開始今日 8 題複習</Button></> : <div className="plan-empty"><Tag size={17} />完成作答後，會優先安排近期錯答與進階題。</div>}</section>;
 

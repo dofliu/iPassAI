@@ -218,3 +218,137 @@ button { border: 0; }
   .cambridge-context-head .index-tag { font-size: 9px; }
   .listening-player-copy { align-items: flex-start; }
 }
+
+/* Official Simulation Exam Enhancements */
+.exam-spec-card {
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--indigo);
+  margin-top: 10px;
+}
+.exam-spec-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #e0e7ff;
+  color: #3730a3;
+  font: 700 10px "DM Mono", monospace;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+.exam-spec-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 8px 0;
+  font-size: 12px;
+  color: var(--ink);
+  font-weight: 700;
+}
+.exam-spec-desc {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.exam-type-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.exam-type-btn {
+  padding: 8px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid var(--rule);
+  background: white;
+  color: var(--indigo);
+  cursor: pointer;
+  text-align: center;
+  transition: all 150ms ease;
+}
+.exam-type-btn.active {
+  background: var(--indigo);
+  color: white;
+  border-color: var(--indigo);
+}
+.pager-button.flagged {
+  border-color: #f59e0b !important;
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+  position: relative;
+}
+.pager-button.flagged::after {
+  content: "★";
+  position: absolute;
+  top: -2px;
+  right: 1px;
+  font-size: 8px;
+  color: #d97706;
+}
+.exam-flag-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--rule);
+  background: white;
+  color: var(--indigo);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+.exam-flag-btn.active {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #b45309;
+}
+.exam-clock.urgent {
+  color: #f59e0b !important;
+  animation: pulse 1s infinite;
+}
+.result-status-card {
+  padding: 24px;
+  color: white;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.result-status-card.pass {
+  background: linear-gradient(135deg, #112b4e 0%, #1a4971 100%);
+  border-left: 6px solid var(--yellow);
+}
+.result-status-card.fail {
+  background: linear-gradient(135deg, #3b1b1b 0%, #682626 100%);
+  border-left: 6px solid #f87171;
+}
+.topic-diagnostics {
+  padding: 20px;
+  background: var(--paper-white);
+  border: 1px solid var(--rule);
+  margin-bottom: 20px;
+}
+.topic-diag-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.2fr) minmax(120px, 1.5fr) 70px;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(25,60,107,.08);
+  font-size: 12px;
+}
+.topic-diag-row:last-child {
+  border-bottom: 0;
+}
+.diag-bar-track {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.diag-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 300ms ease;
+}
+

@@ -10,6 +10,7 @@ type Seed = {
   distractors: [string, string, string];
   topic: string;
   explanation: string;
+  stimulus?: string;
 };
 
 function rotateOptions(seed: Seed, index: number): { options: [string, string, string, string]; answer: number } {
@@ -35,6 +36,7 @@ function makeQuestions(prefix: string, seeds: Seed[], difficulty: Question["diff
       trap: "先從語境、語氣與句法功能判斷，再排除只在局部看似合理但不符合完整語意的選項。",
       source: CEFR_B2_SOURCE,
       sourceUrl: CEFR_B2_SOURCE_URL,
+      stimulus: seed.stimulus,
     };
   });
 }
@@ -147,12 +149,235 @@ const functional: Seed[] = [
   { stem: "You need to tell a colleague that a task is incomplete without sounding accusatory. What should you say?", correct: "The draft is a useful start; could you add the supporting figures before we circulate it?", distractors: ["The draft is careless and unusable.", "You clearly did not try.", "I will replace the whole thing without explanation."], topic: "Functional language and interaction", explanation: "The response recognises progress and states the specific improvement needed." },
   { stem: "You are concluding an argument while acknowledging an alternative view. Which sentence is strongest?", correct: "Although the alternative has some merit, the available evidence favours the proposed approach.", distractors: ["Anyone who disagrees is wrong.", "Evidence is irrelevant to this conclusion.", "There are no alternative views."], topic: "Functional language and interaction", explanation: "Although acknowledges a counterargument before giving a reasoned conclusion." },
   { stem: "You want to invite further questions at the end of a formal talk. Which closing is suitable?", correct: "Thank you for listening. I would be happy to take any questions.", distractors: ["That is all; do not ask anything.", "You should already know the answers.", "Questions would only waste time."], topic: "Functional language and interaction", explanation: "The closing is conventional, polite and clearly opens the floor for questions." },
-    { stem: "You need to correct a small factual error in a shared document. What is the most tactful note?", correct: "I think the date in paragraph three may need checking; the source lists it as 2019.", distractors: ["The date is wrong, as usual.", "You have misunderstood the entire document.", "I changed it without telling anyone."], topic: "Functional language and interaction", explanation: "I think and may need checking soften the correction while providing verifiable evidence." },
+  { stem: "You need to correct a small factual error in a shared document. What is the most tactful note?", correct: "I think the date in paragraph three may need checking; the source lists it as 2019.", distractors: ["The date is wrong, as usual.", "You have misunderstood the entire document.", "I changed it without telling anyone."], topic: "Functional language and interaction", explanation: "I think and may need checking soften the correction while providing verifiable evidence." },
   { stem: "A meeting has become unfocused. Which phrase best brings the group back to the agreed objective?", correct: "Could we return to the main question and decide which option best meets the project's objective?", distractors: ["This discussion is pointless, so stop talking.", "Choose whichever option you prefer without checking the aim.", "The original objective no longer matters."], topic: "Functional language and interaction", explanation: "The response politely redirects the discussion and links the decision to a shared objective." },
 ];
+
+/* -------------------------------------------------------------
+ * 🌟 新增擴充題型 (New CEFR B2 Question Types):
+ * 1. Cloze & Discourse Markers (克漏字與篇章銜接詞)
+ * 2. Collocations & Phrasal Verbs (高頻搭配詞與片語)
+ * 3. Sentence Transformation & Structure (文法句型置換與倒裝)
+ * 4. Workplace & Academic Pragmatics (職場與學術情境溝通)
+ * ------------------------------------------------------------*/
+
+const clozeAndDiscourse: Seed[] = [
+  {
+    stimulus: "Urban planners increasingly favour mixed-use developments over single-purpose residential zones. (1) ___, such projects reduce commuting times and foster vibrant neighbourhood communities; however, they require substantial upfront infrastructure investment.",
+    stem: "Choose the connective that best completes blank (1) based on the passage above.",
+    correct: "On the one hand",
+    distractors: ["In summary", "In spite of", "As a result of"],
+    topic: "Cloze and discourse markers",
+    explanation: "'On the one hand' sets up a two-sided appraisal that is balanced by 'however' in the second clause.",
+  },
+  {
+    stimulus: "The initial clinical trials showed encouraging results regarding efficacy. (1) ___, several senior researchers raised concerns regarding the small sample size and demographic homogeneity.",
+    stem: "Choose the word or phrase that best fits blank (1).",
+    correct: "Nevertheless",
+    distractors: ["Consequently", "Furthermore", "Namely"],
+    topic: "Cloze and discourse markers",
+    explanation: "'Nevertheless' signals contrast between the positive initial efficacy results and the researchers' concerns.",
+  },
+  {
+    stimulus: "Renewable energy adoption has accelerated across the continent. (1) ___, reliance on fossil fuel imports has dropped by an unprecedented twelve percent over the past two quarters.",
+    stem: "Choose the best transition word for blank (1).",
+    correct: "Accordingly",
+    distractors: ["Conversely", "Notwithstanding", "Otherwise"],
+    topic: "Cloze and discourse markers",
+    explanation: "'Accordingly' (or 'Consequently') indicates a logical result following the accelerated adoption of renewables.",
+  },
+  {
+    stimulus: "The corporation updated its remote work policy, granting employees greater autonomy. (1) ___, strict cybersecurity guidelines were introduced to safeguard sensitive client data.",
+    stem: "Which linking phrase best fills blank (1)?",
+    correct: "Simultaneously",
+    distractors: ["Instead", "Whereas", "Unless"],
+    topic: "Cloze and discourse markers",
+    explanation: "'Simultaneously' indicates that two distinct company measures occurred at the same time.",
+  },
+  {
+    stimulus: "Traditional retail stores face fierce competition from e-commerce platforms. (1) ___, physical outlets that offer personalized in-store experiences have managed to retain loyal customer bases.",
+    stem: "Which connector best completes blank (1)?",
+    correct: "Even so",
+    distractors: ["Besides", "Similarly", "In other words"],
+    topic: "Cloze and discourse markers",
+    explanation: "'Even so' acts as a concession marker meaning 'despite this competition'.",
+  },
+  {
+    stimulus: "Public health authorities emphasized that the vaccine is safe and effective. (1) ___ should citizens delay seeking immunization unless explicitly advised by a medical professional.",
+    stem: "Choose the correct phrase to complete the inverted sentence in blank (1).",
+    correct: "Under no circumstances",
+    distractors: ["In any case", "At all events", "To some degree"],
+    topic: "Cloze and discourse markers",
+    explanation: "'Under no circumstances' is a negative adverbial triggering inversion ('should citizens delay').",
+  },
+  {
+    stimulus: "The new automation software was expected to streamline payroll processing. (1) ___, unexpected compatibility glitches with legacy databases caused a two-week delay.",
+    stem: "Which transition best fills blank (1)?",
+    correct: "In the event",
+    distractors: ["As well as", "In addition", "Therefore"],
+    topic: "Cloze and discourse markers",
+    explanation: "'In the event' (or 'As it turned out') introduces what actually happened contrary to expectations.",
+  },
+  {
+    stimulus: "The university decided to freeze tuition fees for the upcoming academic year, (1) ___ providing emergency hardship bursaries for low-income scholars.",
+    stem: "Choose the best phrase to complete blank (1).",
+    correct: "in addition to",
+    distractors: ["in contrast with", "with regard for", "on behalf of"],
+    topic: "Cloze and discourse markers",
+    explanation: "'In addition to' is followed by a gerund and introduces an accompanying supportive measure.",
+  },
+  {
+    stimulus: "Online customer support systems utilize artificial intelligence to resolve frequent queries instantly, (1) ___ human representatives are reserved for complex, high-priority issues.",
+    stem: "Which word best completes the contrast in blank (1)?",
+    correct: "whereas",
+    distractors: ["provided", "inasmuch", "unless"],
+    topic: "Cloze and discourse markers",
+    explanation: "'Whereas' indicates a contrast between AI handling routine queries and humans handling complex ones.",
+  },
+  {
+    stimulus: "The research team gathered extensive quantitative data; (1) ___, they conducted twenty in-depth qualitative interviews to capture nuanced participant experiences.",
+    stem: "Choose the most appropriate discourse marker for blank (1).",
+    correct: "moreover",
+    distractors: ["otherwise", "instead", "conversely"],
+    topic: "Cloze and discourse markers",
+    explanation: "'Moreover' adds supplementary evidence of a complementary qualitative method.",
+  },
+  {
+    stimulus: "The audit identified minor discrepancies in the quarterly inventory reports. (1) ___, the financial statements were deemed fundamentally accurate.",
+    stem: "Which connector fits blank (1)?",
+    correct: "All things considered",
+    distractors: ["For instance", "In consequence", "Above all"],
+    topic: "Cloze and discourse markers",
+    explanation: "'All things considered' summarizes the overall verdict after acknowledging minor discrepancies.",
+  },
+  {
+    stimulus: "The city council voted to expand pedestrian zones, (1) ___ environmental sustainability and improved public health as the primary drivers.",
+    stem: "Which participial phrase correctly completes blank (1)?",
+    correct: "citing",
+    distractors: ["to be cited", "having been cited", "cited with"],
+    topic: "Cloze and discourse markers",
+    explanation: "The present participle 'citing' functions as an adverbial modifier explaining the council's reasoning.",
+  },
+  {
+    stimulus: "Many startup founders concentrate primarily on rapid user acquisition. (1) ___, sustainable profitability should remain the cornerstone of any long-term business strategy.",
+    stem: "Which phrase best establishes the contrasting perspective in blank (1)?",
+    correct: "Be that as it may",
+    distractors: ["As a consequence", "In like manner", "For this purpose"],
+    topic: "Cloze and discourse markers",
+    explanation: "'Be that as it may' accepts the preceding point while asserting the importance of profitability.",
+  },
+  {
+    stimulus: "The company achieved record-breaking quarterly revenue, (1) ___ reflecting robust international demand for its next-generation clean-tech solutions.",
+    stem: "Choose the best adverb for blank (1).",
+    correct: "largely",
+    distractors: ["barely", "reluctantly", "rigidly"],
+    topic: "Cloze and discourse markers",
+    explanation: "'Largely' means mostly or chiefly, explaining the primary cause of the record revenue.",
+  },
+  {
+    stimulus: "The software vendor issued a mandatory patch (1) ___ a critical security vulnerability discovered during routine penetration testing.",
+    stem: "Which prepositional phrase best fills blank (1)?",
+    correct: "in response to",
+    distractors: ["in spite of", "in comparison with", "in terms with"],
+    topic: "Cloze and discourse markers",
+    explanation: "'In response to' indicates the direct triggering event for issuing the security patch.",
+  },
+  {
+    stimulus: "The museum exhibition was widely acclaimed by art critics; (1) ___, public ticket sales surpassed all initial projections within the first fortnight.",
+    stem: "Which connective best indicates reinforcement in blank (1)?",
+    correct: "what is more",
+    distractors: ["on the contrary", "in contrast", "otherwise"],
+    topic: "Cloze and discourse markers",
+    explanation: "'What is more' introduces an additional positive outcome that reinforces the critical success.",
+  },
+  {
+    stimulus: "The committee agreed that the proposed bylaws would take effect on 1 October, (1) ___ final approval by the governing board at next week's plenary session.",
+    stem: "Which conditional phrase best fills blank (1)?",
+    correct: "subject to",
+    distractors: ["contrary to", "adjacent to", "in preference to"],
+    topic: "Cloze and discourse markers",
+    explanation: "'Subject to' means conditional upon receiving approval from the board.",
+  },
+  {
+    stimulus: "Agricultural output fell by 8% due to severe drought conditions. (1) ___, consumer food prices experienced upward pressure across all regional markets.",
+    stem: "Which transitional word best expresses causality in blank (1)?",
+    correct: "Hence",
+    distractors: ["Although", "Whereas", "Notwithstanding"],
+    topic: "Cloze and discourse markers",
+    explanation: "'Hence' (meaning 'for this reason') connects the drop in agricultural output to the rise in prices.",
+  },
+];
+
+const collocationsAndIdioms: Seed[] = [
+  { stem: "When designing the user interface, engineers must take accessibility standards into ___.", correct: "account", distractors: ["regard", "view", "mind"], topic: "Collocations and phrasal verbs", explanation: "'Take into account' (or 'take into consideration') is a standard collocation meaning to consider." },
+  { stem: "The latest archaeological discovery has shed new ___ on ancient maritime trade routes.", correct: "light", distractors: ["vision", "insight", "focus"], topic: "Collocations and phrasal verbs", explanation: "'Shed light on' is an idiomatic expression meaning to provide clarifying information about something." },
+  { stem: "The success of the renewable energy initiative will largely ___ on public participation.", correct: "hinge", distractors: ["attach", "bind", "fasten"], topic: "Collocations and phrasal verbs", explanation: "'Hinge on' means to depend entirely on something." },
+  { stem: "The government pledged to ___ down on fraudulent online advertising schemes.", correct: "clamp", distractors: ["strike", "press", "force"], topic: "Collocations and phrasal verbs", explanation: "'Clamp down on' means to act strictly to prevent illegal or harmful activity." },
+  { stem: "Her groundbreaking research in neural networks paved the ___ for modern conversational AI.", correct: "way", distractors: ["road", "path", "track"], topic: "Collocations and phrasal verbs", explanation: "'Pave the way for' is a standard idiom meaning to create conditions for future developments." },
+  { stem: "The company had to ___ the consequences of neglecting system maintenance for years.", correct: "face", distractors: ["look", "head", "meet"], topic: "Collocations and phrasal verbs", explanation: "'Face the consequences' means to accept and deal with the unpleasant outcome of actions." },
+  { stem: "Senior management agreed to give the green ___ to the innovative carbon-capture project.", correct: "light", distractors: ["flag", "sign", "mark"], topic: "Collocations and phrasal verbs", explanation: "'Give the green light' means to grant official permission for a project to proceed." },
+  { stem: "Rising supply chain costs have eaten ___ the firm's quarterly operating profit margins.", correct: "into", distractors: ["away", "upon", "down"], topic: "Collocations and phrasal verbs", explanation: "'Eat into' is a phrasal verb meaning to use up or reduce a part of something valuable." },
+  { stem: "The lead architect made a point of ___ the client's preferences into the blueprint.", correct: "incorporating", distractors: ["accumulating", "implicating", "substituting"], topic: "Collocations and phrasal verbs", explanation: "'Incorporate something into' means to include or blend something as part of a whole." },
+  { stem: "Before finalizing the contract, both legal teams need to iron ___ the remaining ambiguities.", correct: "out", distractors: ["up", "off", "through"], topic: "Collocations and phrasal verbs", explanation: "'Iron out' means to resolve or eliminate minor difficulties or differences." },
+  { stem: "The new electric vehicle model has lived ___ to its reputation for outstanding efficiency.", correct: "up", distractors: ["on", "out", "by"], topic: "Collocations and phrasal verbs", explanation: "'Live up to' means to match expectations or standards." },
+  { stem: "The director's sudden resignation came as a bolt from the ___, stunning the board.", correct: "blue", distractors: ["dark", "sky", "storm"], topic: "Collocations and phrasal verbs", explanation: "'A bolt from the blue' is an idiom describing a complete, unexpected surprise." },
+  { stem: "In academic writing, scholars must avoid drawing conclusions that are not ___ up by evidence.", correct: "backed", distractors: ["stood", "held", "lifted"], topic: "Collocations and phrasal verbs", explanation: "'Backed up by' means supported or substantiated by facts or data." },
+  { stem: "The project was carried ___ in strict adherence to international safety protocols.", correct: "out", distractors: ["on", "over", "through"], topic: "Collocations and phrasal verbs", explanation: "'Carry out' means to perform, conduct, or execute an activity." },
+  { stem: "The team worked around the ___ to restore database connectivity before business hours.", correct: "clock", distractors: ["hour", "time", "watch"], topic: "Collocations and phrasal verbs", explanation: "'Work around the clock' means to work continuously day and night without stopping." },
+  { stem: "His extensive background in machine learning makes him an asset beyond ___ to our team.", correct: "measure", distractors: ["count", "scale", "bound"], topic: "Collocations and phrasal verbs", explanation: "'Beyond measure' is a formal collocation meaning extremely great in extent or value." },
+  { stem: "The committee has yet to come to ___ with the long-term implications of the ruling.", correct: "terms", distractors: ["words", "minds", "views"], topic: "Collocations and phrasal verbs", explanation: "'Come to terms with' means to accept and deal with a challenging situation." },
+  { stem: "Effective mentors know when to step ___ and let junior colleagues take the lead.", correct: "back", distractors: ["down", "away", "out"], topic: "Collocations and phrasal verbs", explanation: "'Step back' means to withdraw slightly to allow others space or perspective." },
+];
+
+const sentenceTransformations: Seed[] = [
+  { stem: "Rewrite: 'We rarely see such dedication in young researchers.' → 'Rarely ___ such dedication in young researchers.'", correct: "do we see", distractors: ["we see", "we have seen", "did we saw"], topic: "Sentence transformation and structure", explanation: "Initial negative adverbial 'Rarely' requires present simple inversion: 'do we see'." },
+  { stem: "Rewrite: 'If you should require further assistance, please contact our helpdesk.' → '___ you require further assistance, please contact our helpdesk.'", correct: "Should", distractors: ["Were", "Had", "Unless"], topic: "Sentence transformation and structure", explanation: "Inversion for conditional 'If you should...' drops 'if' and begins with auxiliary 'Should'." },
+  { stem: "Rewrite: 'The team only discovered the error after running the third simulation.' → 'It was not until the third simulation was run ___ the error was discovered.'", correct: "that", distractors: ["when", "then", "which"], topic: "Sentence transformation and structure", explanation: "The cleft pattern 'It was not until X that Y' requires 'that' to introduce the main clause." },
+  { stem: "Rewrite: 'Although she was inexperienced, she handled the crisis remarkably well.' → 'Inexperienced ___ she was, she handled the crisis remarkably well.'", correct: "though", distractors: ["despite", "even", "however"], topic: "Sentence transformation and structure", explanation: "Adjective + though/as + subject + verb is an inverted concessive construction." },
+  { stem: "Rewrite: 'They did not realize how serious the data breach was.' → 'Little ___ how serious the data breach was.'", correct: "did they realize", distractors: ["they realized", "they had realized", "do they realize"], topic: "Sentence transformation and structure", explanation: "Negative adverbial 'Little' at sentence start triggers past inversion 'did they realize'." },
+  { stem: "Rewrite: 'The bridge collapsed because the foundation was weak.' → 'Had the foundation not been weak, the bridge ___.'", correct: "would not have collapsed", distractors: ["will not collapse", "did not collapse", "would not collapse"], topic: "Sentence transformation and structure", explanation: "Third conditional inverted clause ('Had the foundation not been...') takes 'would not have + V-en'." },
+  { stem: "Rewrite: 'You must not disclose the password to anyone under any circumstances.' → 'Under no circumstances ___ the password to anyone.'", correct: "must you disclose", distractors: ["you must disclose", "you should to disclose", "must disclose you"], topic: "Sentence transformation and structure", explanation: "'Under no circumstances' triggers modal inversion: 'must you disclose'." },
+  { stem: "Rewrite: 'She solved the algorithm and also documented the entire codebase.' → 'Not only ___ the algorithm, but she also documented the codebase.'", correct: "did she solve", distractors: ["she solved", "she was solving", "had she solved"], topic: "Sentence transformation and structure", explanation: "'Not only' at the beginning triggers auxiliary inversion 'did she solve'." },
+  { stem: "Rewrite: 'I would prefer you not to mention this matter during the meeting.' → 'I would rather you ___ this matter during the meeting.'", correct: "did not mention", distractors: ["do not mention", "not to mention", "not mentioning"], topic: "Sentence transformation and structure", explanation: "'Would rather + subject' takes past subjunctive ('did not mention') for present/future preferences." },
+  { stem: "Rewrite: 'The manager hired a consultant to audit the accounts.' → 'The manager had the accounts ___ by a consultant.'", correct: "audited", distractors: ["auditing", "to audit", "been audited"], topic: "Sentence transformation and structure", explanation: "Causative structure: have + object + past participle ('had the accounts audited')." },
+  { stem: "Rewrite: 'It is expected that the committee will release its verdict tomorrow.' → 'The committee is expected ___ its verdict tomorrow.'", correct: "to release", distractors: ["releasing", "release", "to have released"], topic: "Sentence transformation and structure", explanation: "Passive reporting transformation converts 'It is expected that S + V' to 'S is expected to V'." },
+  { stem: "Rewrite: 'The moment the speaker finished, the audience gave a standing ovation.' → 'Scarcely had the speaker finished ___ the audience applauded.'", correct: "when", distractors: ["than", "that", "then"], topic: "Sentence transformation and structure", explanation: "'Scarcely... when' and 'Hardly... when' are paired correlatives (contrasting with 'No sooner... than')." },
+  { stem: "Rewrite: 'He regrets not accepting the fellowship in Zurich.' → 'He wishes he ___ the fellowship in Zurich.'", correct: "had accepted", distractors: ["accepted", "would accept", "has accepted"], topic: "Sentence transformation and structure", explanation: "Past regrets with 'wish' require the past perfect tense: 'had accepted'." },
+  { stem: "Rewrite: 'We will approve the budget only if all receipts are submitted.' → 'Only if all receipts are submitted ___ the budget.'", correct: "will we approve", distractors: ["we will approve", "we approve", "do we approve"], topic: "Sentence transformation and structure", explanation: "'Only if...' at the start requires inversion in the main clause: 'will we approve'." },
+  { stem: "Rewrite: 'Someone should have notified the clients earlier.' → 'The clients ought ___ earlier.'", correct: "to have been notified", distractors: ["to notify", "having notified", "to be notified"], topic: "Sentence transformation and structure", explanation: "'Ought to have been + V-en' expresses an unfulfilled past passive obligation." },
+  { stem: "Rewrite: 'What amazed the judges was her poise under intense questioning.' → 'It was her poise under intense questioning ___ the judges.'", correct: "that amazed", distractors: ["which it amazed", "what amazed", "whom amazed"], topic: "Sentence transformation and structure", explanation: "It-cleft sentence formula: It + is/was + focus + that/who + rest of clause." },
+  { stem: "Rewrite: 'As soon as we arrived at the venue, the rehearsal began.' → 'No sooner had we arrived at the venue ___ the rehearsal began.'", correct: "than", distractors: ["when", "then", "that"], topic: "Sentence transformation and structure", explanation: "'No sooner had... than...' is the exact correlative structure for immediate succession." },
+  { stem: "Rewrite: 'The technician said, “I didn't alter any default configuration settings.”' → 'The technician denied ___ any default settings.'", correct: "having altered", distractors: ["to alter", "to have altered", "alter"], topic: "Sentence transformation and structure", explanation: "'Deny' takes gerund or perfect gerund ('having altered') in reported speech." },
+];
+
+const appliedPragmatics: Seed[] = [
+  { stem: "In a formal business email, how should you politely nudge a vendor who has missed a delivery deadline?", correct: "Could you kindly provide an updated estimated delivery date for our purchase order #402?", distractors: ["Why is our order late again?", "Deliver the order right now or cancel it.", "I assume you have forgotten about our order."], topic: "Applied situational pragmatics", explanation: "Polite, professional inquiry requesting a concrete update without aggressive accusatory tone." },
+  { stem: "During a cross-functional sprint review, you need to diplomatically suggest that a teammate's estimation is overly optimistic. What should you say?", correct: "While the timeline is ambitious, we might want to factor in potential QA testing bottlenecks.", distractors: ["That deadline is completely unrealistic and impossible.", "You clearly have no idea how long QA takes.", "Let's just give up on meeting this deadline."], topic: "Applied situational pragmatics", explanation: "Constructive hedging ('While...', 'we might want to factor in...') highlights risk without attacking." },
+  { stem: "You are moderating a panel discussion and need to gracefully interrupt a speaker who has exceeded their time limit. What is best?", correct: "Thank you for those insightful remarks; in the interest of time, let's now hear from Dr. Chen.", distractors: ["Stop talking, your time was up two minutes ago.", "Be quiet so the next person can speak.", "I am cutting your microphone now."], topic: "Applied situational pragmatics", explanation: "Validates the speaker's contribution while using 'in the interest of time' to transition smoothly." },
+  { stem: "You receive an ambiguous task description from your manager. How should you ask for clarification without appearing incompetent?", correct: "To ensure alignment with project goals, could we briefly confirm the primary deliverables for this phase?", distractors: ["I don't understand anything you wrote here.", "You didn't explain the task properly.", "Should I just guess what you want me to do?"], topic: "Applied situational pragmatics", explanation: "Frames the request around 'ensuring alignment with project goals' which sounds proactive." },
+  { stem: "How do you deliver constructive critical feedback on a peer's draft report in a collaborative workplace?", correct: "The literature review is comprehensive; tightening the methodology section would strengthen the overall argument.", distractors: ["Your methodology section is poorly written.", "Delete the methodology and start over.", "Everything is fine, don't change anything."], topic: "Applied situational pragmatics", explanation: "Balances praise for strong parts with specific, actionable suggestions for improvement." },
+  { stem: "In an academic seminar, how do you express polite disagreement with a presenter's statistical interpretation?", correct: "I find your hypothesis compelling; however, could the variance be partially accounted for by demographic outliers?", distractors: ["Your statistics are clearly flawed and invalid.", "Nobody uses that statistical test anymore.", "I completely disagree with everything you said."], topic: "Applied situational pragmatics", explanation: "Acknowledges the hypothesis before introducing an alternative variable for consideration." },
+  { stem: "A client requests a major feature addition outside the agreed project scope. How do you respond professionally?", correct: "We would be delighted to incorporate this feature; I will prepare a separate addendum detailing the timeline and cost adjustments.", distractors: ["No, that is not in the contract.", "You can't just add features whenever you want.", "We will do it for free just to keep you happy."], topic: "Applied situational pragmatics", explanation: "Welcoming the request while clearly linking out-of-scope work to formal contract addenda and pricing." },
+  { stem: "You are leading a conference call where two participants are talking over each other. How should you intervene?", correct: "Let's hear Mark's point first, and then we'll immediately turn to Sarah for her perspective.", distractors: ["Both of you stop arguing immediately.", "Mute yourselves until I tell you to speak.", "Whoever speaks loudest can continue."], topic: "Applied situational pragmatics", explanation: "Establishes structured turn-taking calmly and impartially." },
+  { stem: "You need to decline a high-priority meeting because you are giving a keynote presentation at the same time. What should you write?", correct: "Regrettably, I have an immovable speaking engagement at that hour, but I will review the minutes and share my feedback asynchronously.", distractors: ["I am way too busy with important things to attend.", "Don't schedule meetings when I have presentations.", "I won't be there, so do whatever you want."], topic: "Applied situational pragmatics", explanation: "Explains the genuine conflict politely and offers an asynchronous contribution." },
+  { stem: "How should an author respond to a peer reviewer's harsh critique in an academic journal revision letter?", correct: "We appreciate the reviewer's rigorous assessment and have revised Section 3 to clarify the experimental constraints.", distractors: ["The reviewer clearly failed to read our paper carefully.", "We reject this critique because it is unfair.", "We changed it, though the reviewer is mistaken."], topic: "Applied situational pragmatics", explanation: "Professional scholarly tone that maintains objectivity and highlights constructive revisions." },
+  { stem: "You need to apologize to a client for an inadvertent software outage without damaging the company's credibility. What is best?", correct: "We sincerely apologize for the disruption caused. Our engineering team has resolved the root cause and implemented redundant safeguards.", distractors: ["It wasn't our fault; the cloud provider had an outage.", "Outages happen all the time in software, so please bear with us.", "We are sorry and hope you won't sue us."], topic: "Applied situational pragmatics", explanation: "Acknowledges responsibility, states the fix, and reassures with future preventive safeguards." },
+  { stem: "In an interview, how do you discuss a previous professional failure constructively?", correct: "The campaign fell short of its target, which taught our team the critical importance of early user testing before wide deployment.", distractors: ["The failure was entirely due to my former manager's incompetence.", "I have never failed in any project I worked on.", "It was a disaster and I try not to think about it."], topic: "Applied situational pragmatics", explanation: "Focuses on accountability, reflection, and transferable lessons learned." },
+  { stem: "You want to invite an external industry expert to deliver a guest lecture to your team. How do you open your invitation?", correct: "Given your renowned expertise in data governance, our engineering group would be deeply honored if you could share your insights in a 30-minute virtual session.", distractors: ["Can you give us a free speech next Tuesday?", "We need someone to talk about data governance, so please come.", "Let me know if you are free to do a presentation for us."], topic: "Applied situational pragmatics", explanation: "Complimentary, specific regarding topic and time commitment, and formally respectful." },
+  { stem: "A colleague takes credit for a presentation deck you primarily created. How should you address this in private?", correct: "I noticed my contributions weren't highlighted during today's presentation; moving forward, let's ensure co-authorship is clearly acknowledged.", distractors: ["You stole my work and took all the credit!", "I will report you to HR immediately for plagiarism.", "I guess I shouldn't bother helping you next time."], topic: "Applied situational pragmatics", explanation: "Direct and assertive in private, focused on future alignment and fairness without toxic escalation." },
+  { stem: "How do you close a formal negotiation email when awaiting the other party's counter-proposal?", correct: "We look forward to reviewing your counter-proposal and remain confident we can reach a mutually advantageous agreement.", distractors: ["Send your offer quickly or we walk away.", "Hopefully you won't disappoint us with your numbers.", "We wait for your message."], topic: "Applied situational pragmatics", explanation: "Positive, collaborative tone emphasizing mutual benefit." },
+  { stem: "You need to prompt meeting participants to wrap up their discussion as the allocated room booking is ending. What should you say?", correct: "As we have five minutes remaining in this room, let's summarize our action items and assigned owners.", distractors: ["Pack up your laptops; we are getting kicked out.", "Stop discussing now, time is up.", "Leave immediately."], topic: "Applied situational pragmatics", explanation: "Productively steers the final minutes toward concrete takeaways and accountability." },
+  { stem: "How should a team leader announce an unexpected organizational restructuring to reduce team anxiety?", correct: "While organizational changes can feel unsettling, our core project priorities remain intact, and I will hold open 1-on-1 sessions this week to address all questions.", distractors: ["Everything is changing and some people might lose jobs, so good luck.", "Don't ask questions about the restructure because I don't know either.", "Nothing matters anymore so just keep working."], topic: "Applied situational pragmatics", explanation: "Empathetic, transparent, reassuring about core mission, and establishes direct communication channels." },
+  { stem: "In a formal debate, how do you transition to rebutting the opposing side's argument?", correct: "While our colleagues raise a valid point regarding initial capital outlay, their analysis overlooks long-term lifecycle savings.", distractors: ["The other side is totally wrong about everything they just said.", "That point makes no sense whatsoever.", "Forget what they said and listen to me."], topic: "Applied situational pragmatics", explanation: "Acknowledges the validity of part of the opposing argument before introducing the counter-evidence." },
+];
+
 export const ENGLISH_B2_QUESTIONS: Question[] = [
   ...makeQuestions("VOC", vocabulary, "基礎"),
   ...makeQuestions("GRAM", grammar, "進階"),
   ...makeQuestions("READ", reading, "情境"),
   ...makeQuestions("FUNC", functional, "情境"),
+  ...makeQuestions("CLOZE", clozeAndDiscourse, "進階"),
+  ...makeQuestions("COLLOC", collocationsAndIdioms, "基礎"),
+  ...makeQuestions("TRANS", sentenceTransformations, "進階"),
+  ...makeQuestions("PRAG", appliedPragmatics, "情境"),
 ];
