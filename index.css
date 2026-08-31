@@ -117,6 +117,10 @@ button { border: 0; }
 .text-button { min-height: auto; padding: 3px 0; background: transparent; color: var(--indigo); text-decoration: underline; text-decoration-color: var(--yellow); text-decoration-thickness: 3px; text-underline-offset: 5px; }
 .text-button:hover { color: var(--brick); }
 .solid-button svg, .outline-button svg, .text-button svg { width: 16px; height: 16px; }
+/* 這些類別會與 shadcn Button 的預設 utility（rounded-md、whitespace-nowrap、h-9、shadow）疊用；
+   明確固定方角、可換行與自動高度，維持 Swiss 紙本風格不被 utility 改動。 */
+.solid-button, .outline-button, .text-button, .danger-outline { border-radius: 0; white-space: normal; height: auto; }
+.outline-button, .text-button, .danger-outline { box-shadow: none; }
 
 .welcome-panel, .paper-card { background: rgba(255,253,248,.72); border: 1px solid var(--rule); }
 .welcome-panel { position: relative; padding: 31px 29px 29px; display: flex; flex-direction: column; box-shadow: 7px 7px 0 rgba(25,60,107,.075); }

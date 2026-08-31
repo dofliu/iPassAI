@@ -1115,7 +1115,7 @@ export default function Home() {
                 setPopQuizQuestionId(q.id);
                 setIsPopQuizOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300/80 text-xs font-bold transition-all shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300/80 text-xs font-bold transition-all shadow-xs cursor-pointer whitespace-nowrap shrink-0"
               title="立即開啟隨堂快問快答"
             >
               <Zap size={14} className="text-amber-600 fill-amber-500" />
