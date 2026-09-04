@@ -1,6 +1,6 @@
 # iPassAI - iPAS 智慧學習平台與題庫工坊
 
-> 專為 **經濟部 iPAS 產業人才能力鑑定**（AI 應用規劃師 初級／中級）以及 **國際英語檢定（CEFR B2 / Cambridge B2 First）** 打造的跨平台智慧學習與全真模擬測驗系統。
+> 專為 **經濟部 iPAS 產業人才能力鑑定**（AI 應用規劃師 初級／中級）、**國際英語檢定（CEFR B2 / Cambridge B2 First）** 以及 **Anthropic Claude 認證（CCAR-F 架構師）** 打造的跨平台智慧學習與全真模擬測驗系統。
 
 [![Build Android Debug APK](https://github.com/dofliu/iPassAI/actions/workflows/build-apk.yml/badge.svg)](https://github.com/dofliu/iPassAI/actions/workflows/build-apk.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -26,6 +26,10 @@
   - **iPAS 中級**：人工智慧技術應用與規劃（50 題 / 60 分鐘）、大數據處理分析與應用（50 題 / 60 分鐘）、機器學習技術與應用（50 題 / 60 分鐘）。
   - **CEFR B2 綜合模考**：50 題 / 60 分鐘（60% 通過門檻）。
   - **Cambridge B2 First**：Reading & Use of English 全卷（52 題 / 75 分鐘）、Listening 全卷（30 題 / 40 分鐘，含原創音訊播放）。
+  - **Claude 認證 CCAR-F**：Claude Certified Architect – Foundations（60 題 / 120 分鐘 / 720 分及格），依官方五大領域權重自動配題。
+- **🧠 Claude 認證（CCAR-F）考科**：
+  - 依 Anthropic 官方考綱五大領域配比出題：代理架構與協作編排 27%、Claude Code 設定與工作流 20%、提示工程與結構化輸出 20%、工具設計與 MCP 整合 18%、情境管理與可靠性 15%。
+  - 技術內容對齊 Anthropic 官方文件（Messages API、Claude Agent SDK、Claude Code、MCP），全為本站原創題，非官方考古題。
 - **📝 CEFR B2 多元題型擴充**：
   - 篇章克漏字與銜接詞 (Cloze & Discourse Markers)
   - 高頻搭配詞與核心片語 (Collocations & Phrasal Verbs)
@@ -152,6 +156,7 @@ iPassAI/
 ├── questionExpansion.ts        # 擴充主題題庫
 ├── englishQuestions.ts         # CEFR B2 英文題庫 (含克漏字、搭配詞、句型置換、情境語用)
 ├── cambridgeB2FirstQuestions.ts# Cambridge B2 First 專屬題型題庫 (含聽力語音稿)
+├── claudeCertQuestions.ts      # Claude 認證 CCAR-F 題庫 (五大領域原創仿真題)
 ├── index.html                  # 網頁入口 HTML
 ├── index.css                   # 全域樣式與 Swiss 資訊風格設計
 ├── vite.config.ts              # Vite 與路徑別名配置

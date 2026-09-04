@@ -1,8 +1,12 @@
 import { EXPANDED_QUESTIONS } from "./questionExpansion";
 import { ENGLISH_B2_QUESTIONS, ENGLISH_B2_SUBJECT } from "./englishQuestions";
 import { CAMBRIDGE_B2_FIRST_QUESTIONS } from "./cambridgeB2FirstQuestions";
+import { CLAUDE_CERT_QUESTIONS, CLAUDE_CERT_SUBJECT } from "./claudeCertQuestions";
 
-export type Level = "初級" | "中級";
+export type Level = "初級" | "中級" | "專業認證";
+
+/** 級別的顯示順序；UI 的級別下拉選單一律由此推導，不再各處硬編碼 */
+export const LEVELS: Level[] = ["初級", "中級", "專業認證"];
 
 export type Question = {
   id: string;
@@ -33,11 +37,13 @@ export const SUBJECTS: Record<Level, string[]> = {
     "機器學習技術與應用",
     ENGLISH_B2_SUBJECT,
   ],
+  專業認證: [CLAUDE_CERT_SUBJECT],
 };
 
 export const QUESTIONS: Question[] = [
   ...CAMBRIDGE_B2_FIRST_QUESTIONS,
   ...ENGLISH_B2_QUESTIONS,
+  ...CLAUDE_CERT_QUESTIONS,
   {
     id: "L1-AI-01", level: "初級", subject: "人工智慧基礎概論", topic: "AI 的定義與分類", difficulty: "基礎",
     stem: "某零售商使用歷史交易資料預測下月各品項的需求量。依 AI 的功能分類，最符合此系統的是哪一類？",

@@ -7,9 +7,10 @@ import { Capacitor } from "@capacitor/core";
 import { LocalNotifications, type Channel, type LocalNotificationSchema } from "@capacitor/local-notifications";
 import { QUESTIONS, type Question } from "@/data/questions";
 import { ENGLISH_B2_SUBJECT } from "@/data/englishQuestions";
+import { CLAUDE_CERT_SUBJECT } from "@/data/claudeCertQuestions";
 
 export type NotificationFrequency = "1h" | "2h" | "4h" | "daily_3";
-export type NotificationScope = "all" | "ipas_basic" | "ipas_intermediate" | "english" | "mistakes_first";
+export type NotificationScope = "all" | "ipas_basic" | "ipas_intermediate" | "english" | "claude_cert" | "mistakes_first";
 
 export interface NotificationConfig {
   enabled: boolean;
@@ -132,6 +133,9 @@ export function selectQuizQuestion(scope: NotificationScope = "all"): Question {
         break;
       case "english":
         pool = QUESTIONS.filter((q) => q.subject === ENGLISH_B2_SUBJECT);
+        break;
+      case "claude_cert":
+        pool = QUESTIONS.filter((q) => q.subject === CLAUDE_CERT_SUBJECT);
         break;
       case "all":
       default:

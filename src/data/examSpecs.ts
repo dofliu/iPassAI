@@ -4,6 +4,7 @@
  */
 import { ENGLISH_B2_SUBJECT } from "./englishQuestions";
 import { CAMBRIDGE_B2_FIRST } from "./cambridgeB2FirstQuestions";
+import { CCAR_F_DOMAINS, CLAUDE_CERT_SUBJECT } from "./claudeCertQuestions";
 import type { Level, Question } from "./questions";
 
 export interface ExamSpec {
@@ -159,7 +160,42 @@ export const OFFICIAL_EXAM_SPECS: ExamSpec[] = [
       "Part 4: Multiple Choice Interview",
     ],
   },
+
+  // --- Claude 認證：Claude Certified Architect – Foundations ---
+  {
+    id: "claude-ccar-f",
+    name: "Claude Certified Architect – Foundations (CCAR-F) 全真模考",
+    level: "專業認證",
+    subject: CLAUDE_CERT_SUBJECT,
+    officialQuestionCount: 60,
+    officialDurationMinutes: 120,
+    passingScorePercent: 72,
+    passingScoreNote: "720 / 1000 及格 (答對 ≥ 44 題)",
+    badge: "Anthropic 官方考綱規格",
+    description:
+      "依官方五大領域權重配題：代理架構與協作編排 27%、Claude Code 設定與工作流 20%、提示工程與結構化輸出 20%、工具設計與 MCP 整合 18%、情境管理與可靠性 15%。",
+    topicsCovered: CCAR_F_DOMAINS.map((domain) => `${domain.name}（${domain.weight}%）`),
+  },
 ];
+
+/** CCAR-F 各領域在 60 題模考中的配題數，依官方權重換算後補足至總題數 */
+export function buildDomainQuota(totalQuestions: number): Map<string, number> {
+  const quota = new Map<string, number>();
+  CCAR_F_DOMAINS.forEach((domain) => {
+    quota.set(domain.name, Math.floor((totalQuestions * domain.weight) / 100));
+  });
+  // 無條件捨去後的餘額，依權重由高到低逐一補回
+  let assigned = [...quota.values()].reduce((sum, value) => sum + value, 0);
+  const byWeight = [...CCAR_F_DOMAINS].sort((a, b) => b.weight - a.weight);
+  let index = 0;
+  while (assigned < totalQuestions) {
+    const domain = byWeight[index % byWeight.length];
+    quota.set(domain.name, (quota.get(domain.name) ?? 0) + 1);
+    assigned += 1;
+    index += 1;
+  }
+  return quota;
+}
 
 /**
  * 依目前所選級別、科目與模式尋找最適配的官方模考規格
@@ -209,7 +245,27 @@ export function buildOfficialExamQuestionSet(
     pool = allQuestions.filter((q) => q.level === spec.level && q.subject === spec.subject);
   }
 
-  // 洗牌後依目標題數截取
   const shuffled = [...pool].sort(() => Math.random() - 0.5);
+
+  // CCAR-F 依官方領域權重配題，而非單純隨機抽取
+  if (spec.subject === CLAUDE_CERT_SUBJECT) {
+    const quota = buildDomainQuota(spec.officialQuestionCount);
+    const picked: Question[] = [];
+    quota.forEach((count, domainName) => {
+      picked.push(...shuffled.filter((q) => q.topic === domainName).slice(0, count));
+    });
+    // 若某領域題目不足，以其餘題目補齊至目標題數
+    if (picked.length < spec.officialQuestionCount) {
+      const chosen = new Set(picked.map((q) => q.id));
+      picked.push(
+        ...shuffled
+          .filter((q) => !chosen.has(q.id))
+          .slice(0, spec.officialQuestionCount - picked.length)
+      );
+    }
+    return picked.sort(() => Math.random() - 0.5);
+  }
+
+  // 其餘考科：洗牌後依目標題數截取
   return shuffled.slice(0, Math.min(spec.officialQuestionCount, shuffled.length));
 }
