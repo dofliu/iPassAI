@@ -39,6 +39,7 @@ const SCOPE_OPTIONS: { id: NotificationScope; label: string; desc: string }[] = 
   { id: "ipas_basic", label: "🤖 iPAS AI 初級專屬", desc: "人工智慧基礎概論、生成式 AI 應用與規劃" },
   { id: "ipas_intermediate", label: "⚡ iPAS AI 中級專屬", desc: "技術應用規劃、大數據分析、機器學習應用" },
   { id: "english", label: "🌍 國際英語檢定專屬", desc: "CEFR B2 英文與 Cambridge B2 First 專屬題型" },
+  { id: "claude_cert", label: "🧠 Claude 認證 CCAR-F 專屬", desc: "代理架構、Claude Code、提示工程、MCP 工具與情境管理五大領域" },
 ];
 
 export default function NotificationSettingsModal({
