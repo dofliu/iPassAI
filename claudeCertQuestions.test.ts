@@ -18,9 +18,24 @@ describe("Claude Certified Architect – Foundations 題庫", () => {
     expect(total).toBe(100);
   });
 
-  it("題數足以組出一份 60 題全真模考", () => {
+  it("題庫規模足以讓 60 題模考具備變化度（至少 120 題）", () => {
     const spec = OFFICIAL_EXAM_SPECS.find((s) => s.id === "claude-ccar-f")!;
     expect(CLAUDE_CERT_QUESTIONS.length).toBeGreaterThanOrEqual(spec.officialQuestionCount);
+    expect(CLAUDE_CERT_QUESTIONS.length).toBeGreaterThanOrEqual(120);
+  });
+
+  it("每個領域的題池至少為其模考配額的 1.5 倍，重複做模考才不會抽到同一批題", () => {
+    const spec = OFFICIAL_EXAM_SPECS.find((s) => s.id === "claude-ccar-f")!;
+    const quota = buildDomainQuota(spec.officialQuestionCount);
+    quota.forEach((needed, domainName) => {
+      const pool = CLAUDE_CERT_QUESTIONS.filter((q) => q.topic === domainName).length;
+      expect(pool).toBeGreaterThanOrEqual(Math.ceil(needed * 1.5));
+    });
+  });
+
+  it("沒有重複的題幹", () => {
+    const stems = CLAUDE_CERT_QUESTIONS.map((q) => q.stem);
+    expect(new Set(stems).size).toBe(stems.length);
   });
 
   it("每個領域都有題目，且題目的 topic 都落在五大領域內", () => {
