@@ -28,7 +28,7 @@
   - **Cambridge B2 First**：Reading & Use of English 全卷（52 題 / 75 分鐘）、Listening 全卷（30 題 / 40 分鐘，含原創音訊播放）。
   - **Claude 認證 CCAR-F**：Claude Certified Architect – Foundations（60 題 / 120 分鐘 / 720 分及格），依官方五大領域權重自動配題。
 - **🧠 Claude 認證（CCAR-F）考科**：
-  - 依 Anthropic 官方考綱五大領域配比出題：代理架構與協作編排 27%、Claude Code 設定與工作流 20%、提示工程與結構化輸出 20%、工具設計與 MCP 整合 18%、情境管理與可靠性 15%。
+  - **共 123 題**原創題庫，依 Anthropic 官方考綱五大領域配比出題：代理架構與協作編排 27%、Claude Code 設定與工作流 20%、提示工程與結構化輸出 20%、工具設計與 MCP 整合 18%、情境管理與可靠性 15%。
   - 技術內容對齊 Anthropic 官方文件（Messages API、Claude Agent SDK、Claude Code、MCP），全為本站原創題，非官方考古題。
 - **📝 CEFR B2 多元題型擴充**：
   - 篇章克漏字與銜接詞 (Cloze & Discourse Markers)
@@ -156,7 +156,7 @@ iPassAI/
 ├── questionExpansion.ts        # 擴充主題題庫
 ├── englishQuestions.ts         # CEFR B2 英文題庫 (含克漏字、搭配詞、句型置換、情境語用)
 ├── cambridgeB2FirstQuestions.ts# Cambridge B2 First 專屬題型題庫 (含聽力語音稿)
-├── claudeCertQuestions.ts      # Claude 認證 CCAR-F 題庫 (五大領域原創仿真題)
+├── claudeCertQuestions.ts      # Claude 認證 CCAR-F 題庫 (五大領域 123 題原創仿真題)
 ├── index.html                  # 網頁入口 HTML
 ├── index.css                   # 全域樣式與 Swiss 資訊風格設計
 ├── vite.config.ts              # Vite 與路徑別名配置
