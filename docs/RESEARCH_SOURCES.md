@@ -1,8 +1,20 @@
-# iPAS AI 應用規劃師題庫研究依據
+# 題庫研究依據與內容政策 (Research Sources & Content Policy)
 
-> 建檔日期：2026-08-28（GMT+8）。本平台的自編練習題依循下列官方公開範圍設計，並與官方歷屆試題清楚區隔。
+> 本文說明各考科題庫的**官方來源依據**與**原創題政策**。技術架構見 [專案規劃書](PROJECT_PLAN.md)；操作方式見 [使用者操作指南](USER_GUIDE.md)。
+>
+> 初版建檔 2026-08-28（GMT+8），隨新增考科持續增補。
 
-## 官方來源與採用方式
+## 核心政策
+
+本平台所有互動題目均為**原創練習題**，依各考試的官方公開考綱範圍自行編撰，**不複製任何官方歷屆試題、第三方付費課程或補習教材的題目內容**。每題標示級別、科目、主題、難度、正解、解析與易錯提醒，並在來源欄連結至對應的官方資訊頁，讓使用者可自行取得官方公告的正式試題。
+
+如此可保留官方題目的來源與版本脈絡，也避免將官方內容逐字複製後誤標示為本站原創。
+
+---
+
+## iPAS AI 應用規劃師
+
+### 官方來源與採用方式
 
 | 來源 | 已確認內容 | 平台採用方式 |
 | --- | --- | --- |
@@ -14,29 +26,18 @@
 | 中級學習指引：大數據處理分析與應用 | 機率統計基礎、大數據處理技術、分析方法與工具、大數據在 AI 的應用。 | 自編中級科目二題組。 |
 | 中級學習指引：機器學習技術與應用 | 機率／統計、線性代數、數值優化、機器學習／深度學習、建模調校、機器學習治理。 | 自編中級科目三題組。 |
 
-## 題庫內容政策
 
-本網站的互動題庫使用**原創練習題**，每題標示級別、科目、主題、難度、正解、解析與易錯提醒。網站另提供官方學習資源頁連結，讓使用者可取得公開的歷屆公告試題。如此可以保留官方題目來源與版本脈絡，也避免將官方 PDF 逐字複製後誤標示為本站內容。
+> 題庫資料模型（`Question` 型別）的完整定義見[專案規劃書的資料架構章節](PROJECT_PLAN.md#-資料架構)。
 
-## 目前題庫資料模型
-
-| 欄位 | 說明 |
-| --- | --- |
-| `id` | 不重複的題目代碼。 |
-| `level` | 初級或中級。 |
-| `subject` | 對應官方科目名稱。 |
-| `topic` | 對應官方評鑑主題。 |
-| `difficulty` | 基礎、進階或情境。 |
-| `stem`、`options`、`answer` | 題幹、四個選項與正確選項索引。 |
-| `explanation` | 作答後立即顯示的核心理由。 |
-| `trap` | 常見混淆或錯誤判斷原因。 |
-| `source` | 題目性質；目前均為「依官方範圍自編」。 |
-
-## 公開題材狀態
+### 公開題材狀態
 
 官方學習資源頁可查得初級 114 年第四梯次、115 年第一／二次，以及中級 114 年第二梯次、115 年第一次等公告試題。此狀態隨 iPAS 更新而變動，使用者應以官方學習資源頁的最新公告為準。
 
-## CEFR B2 英文科擴充研究（2026-08-28）
+---
+
+## 國際英語能力檢定
+
+### CEFR B2 英文科擴充研究（2026-08-28）
 
 本次英文科先採通用 CEFR B2 原創練習，不複製任何正式考試試題。能力面向依 Council of Europe 的 CEFR descriptors 與 Companion Volume：B2 屬獨立使用者階段，題庫規劃涵蓋複雜文本主旨與細節、流暢互動、觀點論證、正式與非正式寫作、詞彙與文法在語境中的精準使用，以及線上互動與中介表達。
 
@@ -48,13 +49,13 @@
 
 題庫設計：Reading / Use of English、Vocabulary & Grammar、Functional Language、Writing & Mediation 四類；每題附 CEFR B2 能力面向與「本站依公開能力描述自編」來源標記。若未來指定 Cambridge B2 First、IELTS 或其他考試，須再建立該測驗的專屬題型、計時與配分規格。
 
-### 已核實網頁重點
+#### 已核實網頁重點
 
 Council of Europe 說明 CEFR 共同參照等級以結構化的 illustrative “can-do” descriptors 定義，且 2020 Companion volume 更新與擴充描述，包含 mediation 等相關能力。來源：https://www.coe.int/en/web/common-european-framework-reference-languages/cefr-descriptors
 
 Cambridge English 官方 B2 First 格式頁列出 Reading and Use of English（7 parts／52 questions／75 分鐘）、Writing（2 parts／80 分鐘）、Listening（4 parts／30 questions／約 40 分鐘）及 Speaking（4 parts；雙人約 14 分鐘）四個 component。這些資料只用於規劃可選的 B2 First 模式，不複製其正式試題。來源：https://www.cambridgeenglish.org/exams-and-tests/qualifications/first/format/
 
-## Cambridge B2 First 專屬模式實作紀錄（2026-08-28）
+### Cambridge B2 First 專屬模式（2026-08-28）
 
 平台新增 Cambridge B2 First 模式，依官方格式頁建立 Reading & Use of English 的 Part 1–7 與 Listening 的 Part 1–4 仿真分類。互動內容均為本站原創，不複製 Cambridge 正式試卷、答案或錄音；每題的來源欄連結至 Cambridge English 官方格式頁。Listening 題目以原創 speech script 搭配瀏覽器 `speechSynthesis` 播放，支援一般與慢速重播，答題後才可展開逐字稿。
 
@@ -64,3 +65,34 @@ Cambridge English 官方 B2 First 格式頁列出 Reading and Use of English（7
 | Listening | Part 1–4 篩選、播放／慢速播放、答後逐字稿 | 原創情境與語音稿；不使用正式考試錄音 |
 
 來源：Cambridge English, [B2 First exam format](https://www.cambridgeenglish.org/exams-and-tests/qualifications/first/format/)。
+
+---
+
+## Anthropic Claude 認證（CCAR-F）
+
+新增於 2026-09-04。考科為 **Claude Certified Architect – Foundations (CCAR-F)**。
+
+### 資料來源與採用方式
+
+| 來源 | 已確認內容 | 平台採用方式 |
+| --- | --- | --- |
+| [Anthropic 認證計畫（Pearson VUE）](https://www.pearsonvue.com/us/en/anthropic.html) | 官方認證計畫與考試報名資訊。 | 作為考科的 `sourceUrl` 官方連結。 |
+| 官方公布之 CCAR-F 考試藍圖 | 60 題／120 分鐘／720 分（1000 分制）及格；五大領域權重 27/20/20/18/15。 | 對應 `examSpecs.ts` 的模考規格與領域配額抽題演算法。 |
+| [Anthropic 官方技術文件](https://docs.claude.com/) | Messages API、Claude Agent SDK、Claude Code、MCP 的實際 API 行為與參數。 | 逐題核對題目與解析的技術正確性。 |
+
+### 內容政策補充說明
+
+本考科題目**全部原創**。考試藍圖（領域名稱、權重、題數、時限、及格分數）屬事實性規格，非他人著作；題目內容則依該藍圖自行編撰，並逐項對照 Anthropic 官方文件確認技術正確性——例如新世代模型使用 `thinking: adaptive`（`budget_tokens` 已移除）、結構化輸出使用 `output_config.format`（`output_format` 已棄用）、MCP 連接器須同時提供 `mcp_servers` 與 `mcp_toolset` 等。
+
+本平台**未使用**任何第三方付費課程或補習網站的題庫內容。
+
+### 五大領域與題庫分布
+
+| 領域 | 官方權重 | 題庫量 |
+| --- | :---: | :---: |
+| 代理架構與協作編排 | 27% | 33 |
+| Claude Code 設定與工作流 | 20% | 25 |
+| 提示工程與結構化輸出 | 20% | 25 |
+| 工具設計與 MCP 整合 | 18% | 22 |
+| 情境管理與可靠性 | 15% | 18 |
+| **合計** | 100% | **123** |
